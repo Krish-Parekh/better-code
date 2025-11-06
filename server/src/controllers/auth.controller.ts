@@ -2,9 +2,10 @@ import bcrypt from "bcrypt";
 import { eq } from "drizzle-orm";
 import type { NextFunction, Request, Response } from "express";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
-import { z } from "zod";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
 import db from "../db";
+import { tokens } from "../db/schema/tokens";
 import { users } from "../db/schema/users";
 import type { IResponse } from "../types/main";
 import { createCookieOptions } from "../utils/cookies";
@@ -110,21 +111,56 @@ export const login = async (
 			return response.status(StatusCodes.BAD_REQUEST).json(payload);
 		}
 
-        const accessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, { expiresIn: "1h" });
-        const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, { expiresIn: "2d" });
+		const accessToken = jwt.sign(
+			{ id: user.id },
+			process.env.ACCESS_TOKEN_SECRET!,
+			{ expiresIn: "1h" },
+		);
+		const refreshToken = jwt.sign(
+			{ id: user.id },
+			process.env.REFRESH_TOKEN_SECRET!,
+			{ expiresIn: "2d" },
+		);
 
-        response.cookie("accessToken", accessToken, createCookieOptions({
-            expires: new Date(Date.now() + 1000 * 60 * 60), // 1 hour 
-        }));
-        response.cookie("refreshToken", refreshToken, createCookieOptions({
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2), // 2 days
-        }));
+		const accessTokenExpiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+		const refreshTokenExpiresAt = new Date(
+			Date.now() + 1000 * 60 * 60 * 24 * 2,
+		); // 2 days
 
-        const payload: IResponse<unknown> = {
-            status: StatusCodes.OK,
-            message: ReasonPhrases.OK,
-        };
-        return response.status(StatusCodes.OK).json(payload);
+		const result = await db.insert(tokens).values({
+			userId: user.id,
+			token: refreshToken,
+			expiresAt: refreshTokenExpiresAt,
+		});
+
+		if (!result) {
+			const payload: IResponse<unknown> = {
+				status: StatusCodes.INTERNAL_SERVER_ERROR,
+				message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+			};
+			return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json(payload);
+		}
+
+		response.cookie(
+			"accessToken",
+			accessToken,
+			createCookieOptions({
+				expires: accessTokenExpiresAt,
+			}),
+		);
+		response.cookie(
+			"refreshToken",
+			refreshToken,
+			createCookieOptions({
+				expires: refreshTokenExpiresAt,
+			}),
+		);
+
+		const payload: IResponse<unknown> = {
+			status: StatusCodes.OK,
+			message: ReasonPhrases.OK,
+		};
+		return response.status(StatusCodes.OK).json(payload);
 	} catch (error) {
 		next(error);
 	}
