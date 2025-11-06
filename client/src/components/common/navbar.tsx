@@ -13,8 +13,8 @@ export default function Navbar() {
                     </Link>
                 </div>
                 <div className="h-full cursor-pointer">
-                    <Link href="/signup" className="flex p-4 border-s-2 border-dashed border-gray-200 h-full items-center justify-center gap-4">
-                        <h2 className="text-xl font-bold text-center">Signup</h2>
+                    <Link href="/register" className="flex p-4 border-s-2 border-dashed border-gray-200 h-full items-center justify-center gap-4">
+                        <h2 className="text-xl font-bold text-center">Register</h2>
                     </Link>
                 </div>
             </div>
