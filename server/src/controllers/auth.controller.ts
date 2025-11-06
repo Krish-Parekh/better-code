@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { eq } from "drizzle-orm";
+import { and, eq, gt, isNull, lt } from "drizzle-orm";
 import type { NextFunction, Request, Response } from "express";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
@@ -125,10 +125,155 @@ export const login = async (
 		const accessTokenExpiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
 		const refreshTokenExpiresAt = new Date(
 			Date.now() + 1000 * 60 * 60 * 24 * 2,
-		); // 2 days
+		); // 2 days in milliseconds
+
+		await db
+			.update(tokens)
+			.set({ revokedAt: new Date() })
+			.where(
+				and(
+					eq(tokens.userId, user.id),
+					isNull(tokens.revokedAt),
+					gt(tokens.expiresAt, new Date()),
+				),
+			);
 
 		const result = await db.insert(tokens).values({
 			userId: user.id,
+			token: refreshToken,
+			expiresAt: refreshTokenExpiresAt,
+		});
+
+		if (!result) {
+			const payload: IResponse<unknown> = {
+				status: StatusCodes.INTERNAL_SERVER_ERROR,
+				message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+			};
+			return response.status(StatusCodes.INTERNAL_SERVER_ERROR).json(payload);
+		}
+
+		response.cookie(
+			"accessToken",
+			accessToken,
+			createCookieOptions({
+				expires: accessTokenExpiresAt,
+			}),
+		);
+		response.cookie(
+			"refreshToken",
+			refreshToken,
+			createCookieOptions({
+				expires: refreshTokenExpiresAt,
+			}),
+		);
+
+		const payload: IResponse<unknown> = {
+			status: StatusCodes.OK,
+			message: ReasonPhrases.OK,
+		};
+		return response.status(StatusCodes.OK).json(payload);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const refresh = async (
+	request: Request,
+	response: Response,
+	next: NextFunction,
+) => {
+	try {
+		const incomingRefreshToken = request.cookies.refreshToken;
+		if (!incomingRefreshToken) {
+			const payload: IResponse<unknown> = {
+				status: StatusCodes.BAD_REQUEST,
+				message: ReasonPhrases.BAD_REQUEST,
+			};
+			return response.status(StatusCodes.BAD_REQUEST).json(payload);
+		}
+
+		// verify the refresh token
+		let decoded: jwt.JwtPayload;
+		try {
+			decoded = jwt.verify(
+				incomingRefreshToken,
+				process.env.REFRESH_TOKEN_SECRET!,
+			) as jwt.JwtPayload;
+		} catch (error) {
+			const payload: IResponse<unknown> = {
+				status: StatusCodes.UNAUTHORIZED,
+				message: ReasonPhrases.UNAUTHORIZED,
+			};
+			return response.status(StatusCodes.UNAUTHORIZED).json(payload);
+		}
+
+		const userId = (decoded as any).id;
+		if (!userId) {
+			return response.status(StatusCodes.UNAUTHORIZED).json({
+				status: StatusCodes.UNAUTHORIZED,
+				message: "Malformed refresh token",
+			} as IResponse<unknown>);
+		}
+
+		// Check for the exact tokens in our table
+		const tokenRows = await db
+			.select()
+			.from(tokens)
+			.where(
+				and(eq(tokens.userId, userId), eq(tokens.token, incomingRefreshToken)),
+			);
+		if (tokenRows.length === 0 || !tokenRows[0]) {
+			const payload: IResponse<unknown> = {
+				status: StatusCodes.UNAUTHORIZED,
+				message: ReasonPhrases.UNAUTHORIZED,
+			};
+			return response.status(StatusCodes.UNAUTHORIZED).json(payload);
+		}
+
+		const row = tokenRows[0];
+		if (!row) {
+			const payload: IResponse<unknown> = {
+				status: StatusCodes.UNAUTHORIZED,
+				message: ReasonPhrases.UNAUTHORIZED,
+			};
+			return response.status(StatusCodes.UNAUTHORIZED).json(payload);
+		}
+
+		if (row.revokedAt) {
+			const payload: IResponse<unknown> = {
+				status: StatusCodes.UNAUTHORIZED,
+				message: ReasonPhrases.UNAUTHORIZED,
+			};
+			return response.status(StatusCodes.UNAUTHORIZED).json(payload);
+		}
+
+		if (row.expiresAt < new Date()) {
+			const payload: IResponse<unknown> = {
+				status: StatusCodes.UNAUTHORIZED,
+				message: ReasonPhrases.UNAUTHORIZED,
+			};
+			return response.status(StatusCodes.UNAUTHORIZED).json(payload);
+		}
+
+		// prepare new tokens
+		const accessToken = jwt.sign(
+			{ id: userId },
+			process.env.ACCESS_TOKEN_SECRET!,
+			{ expiresIn: "1h" },
+		);
+		const refreshToken = jwt.sign(
+			{ id: userId },
+			process.env.REFRESH_TOKEN_SECRET!,
+			{ expiresIn: "2d" },
+		);
+
+		const accessTokenExpiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+		const refreshTokenExpiresAt = new Date(
+			Date.now() + 1000 * 60 * 60 * 24 * 2,
+		); // 2 days in milliseconds
+
+		const result = await db.insert(tokens).values({
+			userId: userId,
 			token: refreshToken,
 			expiresAt: refreshTokenExpiresAt,
 		});
