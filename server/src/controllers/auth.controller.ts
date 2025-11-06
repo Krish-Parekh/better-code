@@ -270,6 +270,10 @@ export const refresh = async (
             Date.now() + 1000 * 60 * 60 * 24 * 2,
         ); // 2 days in milliseconds
 
+
+        // but we need to update the revokedAt field, to the current date and time
+        await db.update(tokens).set({ revokedAt: new Date() }).where(eq(tokens.id, row.id));
+        
         // insert the new refresh token, for the user ids get added 
         const result = await db.insert(tokens).values({
             userId: userId,
