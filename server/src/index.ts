@@ -1,11 +1,11 @@
-import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
+import dotenv from "dotenv";
+import express from "express";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import authRouter from "./routers/auth.routers";
 
 dotenv.config({
-    path: ".env",
+	path: ".env",
 });
 
 const app = express();
@@ -17,7 +17,6 @@ app.use("/api/v1/auth", authRouter);
 
 app.use(errorMiddleware);
 
-
 app.listen(process.env.PORT, () => {
-    console.log(`Server is running on port ${process.env.PORT}`);
-})
+	console.log(`Server is running on port ${process.env.PORT}`);
+});
