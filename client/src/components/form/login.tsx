@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,12 +9,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "../ui/form";
+
+const loginSchema = z.object({
+  email: z.email().max(255),
+  password: z.string().min(8).max(255),
+});
 
 export default function LoginForm() {
+
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = (data: z.infer<typeof loginSchema>) => {}
   return (
     <div className="flex items-center justify-center w-full">
       <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
@@ -25,39 +44,32 @@ export default function LoginForm() {
           </CardHeader>
           <CardContent>
             <form action="#" method="post" className="space-y-4">
-              <div>
-                <Label
-                  htmlFor="email-login-05"
-                  className="text-sm font-medium text-foreground dark:text-foreground"
-                >
-                  Email
-                </Label>
-                <Input
-                  type="email"
-                  id="email-login-05"
-                  name="email-login-05"
-                  autoComplete="email-login-05"
-                  placeholder="ephraim@blocks.so"
-                  className="mt-2"
-                />
-              </div>
-
-              <div>
-                <Label
-                  htmlFor="password-login-05"
-                  className="text-sm font-medium text-foreground dark:text-foreground"
-                >
-                  Password
-                </Label>
-                <Input
-                  type="password"
-                  id="password-login-05   "
-                  name="password-login-05"
-                  autoComplete="password-login-05"
-                  placeholder="Password"
-                  className="mt-2"
-                />
-              </div>
+              <Form {...form}>
+                <FormField control={form.control} name="email" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="ephraim@blocks.so"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="password" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Password"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </Form>
             </form>
           </CardContent>
           <CardFooter>
