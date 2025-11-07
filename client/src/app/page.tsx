@@ -25,7 +25,7 @@ export default function Home() {
             BetterCode is a platform to <Highlighter>practice coding</Highlighter> problems and improve
             your skills. Join us and start your coding journey today!
           </p>
-          <Link href="/get-started" >
+          <Link href="/problems" >
             <Button size="lg" className="cursor-pointer">
               Get Started <ArrowUpRight />
             </Button>
