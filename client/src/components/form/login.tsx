@@ -52,6 +52,7 @@ export default function LoginForm() {
                       <Input
                         type="email"
                         placeholder="ephraim@blocks.so"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -64,6 +65,7 @@ export default function LoginForm() {
                       <Input
                         type="password"
                         placeholder="Password"
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -73,7 +75,7 @@ export default function LoginForm() {
             </form>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full py-2 font-medium">
+            <Button type="submit" className="w-full py-2 font-medium cursor-pointer">
               Login
             </Button>
           </CardFooter>

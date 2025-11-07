@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,11 +8,44 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import Link from "next/dist/client/link";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "../ui/form";
+
+const registerSchema = z.object({
+  username: z.string().min(1).max(255),
+  email: z.email().max(255),
+  password: z.string().min(8).max(255),
+});
 
 export default function RegisterForm() {
+  const form = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit = async (data: z.infer<typeof registerSchema>) => {
+    const response = await fetch("http://localhost:8000/api/v1/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.ok) {
+      console.log("Registered successfully");
+    } else {
+      console.log("Failed to register");
+    }
+  }
+
   return (
     <div className="flex items-center justify-center w-full">
       <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
@@ -24,61 +58,37 @@ export default function RegisterForm() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action="#" method="post" className="space-y-4">
-              <div>
-                <Label
-                  htmlFor="name-login-05"
-                  className="text-sm font-medium text-foreground dark:text-foreground"
-                >
-                  Name
-                </Label>
-                <Input
-                  type="text"
-                  id="name-login-05"
-                  name="name-login-05"
-                  autoComplete="name-login-05"
-                  placeholder="Name"
-                  className="mt-2"
-                />
-              </div>
-
-              <div>
-                <Label
-                  htmlFor="email-login-05"
-                  className="text-sm font-medium text-foreground dark:text-foreground"
-                >
-                  Email
-                </Label>
-                <Input
-                  type="email"
-                  id="email-login-05"
-                  name="email-login-05"
-                  autoComplete="email-login-05"
-                  placeholder="ephraim@blocks.so"
-                  className="mt-2"
-                />
-              </div>
-
-              <div>
-                <Label
-                  htmlFor="password-login-05"
-                  className="text-sm font-medium text-foreground dark:text-foreground"
-                >
-                  Password
-                </Label>
-                <Input
-                  type="password"
-                  id="password-login-05   "
-                  name="password-login-05"
-                  autoComplete="password-login-05"
-                  placeholder="Password"
-                  className="mt-2"
-                />
-              </div>
-            </form>
+            <Form {...form}>
+              <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+                <FormField control={form.control} name="username" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="John Doe" />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="email" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="john.doe@example.com" />
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="password" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Password" />
+                    </FormControl>
+                  </FormItem>
+                )} />
+              </form>
+            </Form>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full py-2 font-medium">
+            <Button onClick={form.handleSubmit(onSubmit)} type="submit" className="w-full py-2 font-medium cursor-pointer">
               Create account
             </Button>
           </CardFooter>
