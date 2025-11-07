@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import AppProviders from "@/providers";
+import { Toaster } from "sonner";
 
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -22,7 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn(bricolage.className, "antialiased")}>
-        {children}
+        <AppProviders>
+          {children}
+        </AppProviders>
+        <Toaster />
       </body>
     </html>
   );
