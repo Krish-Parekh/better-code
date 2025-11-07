@@ -7,7 +7,7 @@ interface IMaxWidthContainerProps {
 
 export default function MaxWidthContainer({ children, className }: IMaxWidthContainerProps) {
     return (
-        <div className={cn("mx-auto w-full max-w-6xl", className)}>
+        <div className={cn("mx-auto w-full max-w-7xl", className)}>
             {children}
         </div>
     )
