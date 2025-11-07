@@ -9,12 +9,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "../ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "../ui/form";
 
 const loginSchema = z.object({
   email: z.email().max(255),
@@ -22,7 +29,6 @@ const loginSchema = z.object({
 });
 
 export default function LoginForm() {
-
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -31,7 +37,7 @@ export default function LoginForm() {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof loginSchema>) => {}
+  const onSubmit = (data: z.infer<typeof loginSchema>) => {};
   return (
     <div className="flex items-center justify-center w-full">
       <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
@@ -45,37 +51,48 @@ export default function LoginForm() {
           <CardContent>
             <form action="#" method="post" className="space-y-4">
               <Form {...form}>
-                <FormField control={form.control} name="email" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="ephraim@blocks.so"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="password" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="ephraim@blocks.so"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </Form>
             </form>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full py-2 font-medium cursor-pointer">
+            <Button
+              type="submit"
+              className="w-full py-2 font-medium cursor-pointer"
+            >
               Login
             </Button>
           </CardFooter>

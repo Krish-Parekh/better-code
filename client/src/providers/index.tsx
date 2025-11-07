@@ -1,14 +1,9 @@
 import { SWRConfig } from "swr";
 
 interface IProviderProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export default function AppProviders({ children }: IProviderProps) {
-    return (
-        <SWRConfig>
-            {children}
-        </SWRConfig>
-    );
-
+  return <SWRConfig>{children}</SWRConfig>;
 }

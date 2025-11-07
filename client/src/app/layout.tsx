@@ -24,9 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn(bricolage.className, "antialiased")}>
-        <AppProviders>
-          {children}
-        </AppProviders>
+        <AppProviders>{children}</AppProviders>
         <Toaster />
       </body>
     </html>

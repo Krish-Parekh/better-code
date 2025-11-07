@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   ComponentPropsWithoutRef,
@@ -6,22 +6,22 @@ import {
   useId,
   useRef,
   useState,
-} from "react"
-import { motion } from "motion/react"
+} from "react";
+import { motion } from "motion/react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 export interface AnimatedGridPatternProps
   extends ComponentPropsWithoutRef<"svg"> {
-  width?: number
-  height?: number
-  x?: number
-  y?: number
-  strokeDasharray?: number
-  numSquares?: number
-  maxOpacity?: number
-  duration?: number
-  repeatDelay?: number
+  width?: number;
+  height?: number;
+  x?: number;
+  y?: number;
+  strokeDasharray?: number;
+  numSquares?: number;
+  maxOpacity?: number;
+  duration?: number;
+  repeatDelay?: number;
 }
 
 export function AnimatedGridPattern({
@@ -36,16 +36,16 @@ export function AnimatedGridPattern({
   duration = 4,
   ...props
 }: AnimatedGridPatternProps) {
-  const id = useId()
-  const containerRef = useRef(null)
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
-  const [squares, setSquares] = useState(() => generateSquares(numSquares))
+  const id = useId();
+  const containerRef = useRef(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [squares, setSquares] = useState(() => generateSquares(numSquares));
 
   function getPos() {
     return [
       Math.floor((Math.random() * dimensions.width) / width),
       Math.floor((Math.random() * dimensions.height) / height),
-    ]
+    ];
   }
 
   // Adjust the generateSquares function to return objects with an id, x, and y
@@ -53,7 +53,7 @@ export function AnimatedGridPattern({
     return Array.from({ length: count }, (_, i) => ({
       id: i,
       pos: getPos(),
-    }))
+    }));
   }
 
   // Function to update a single square's position
@@ -65,17 +65,17 @@ export function AnimatedGridPattern({
               ...sq,
               pos: getPos(),
             }
-          : sq
-      )
-    )
-  }
+          : sq,
+      ),
+    );
+  };
 
   // Update squares to animate in
   useEffect(() => {
     if (dimensions.width && dimensions.height) {
-      setSquares(generateSquares(numSquares))
+      setSquares(generateSquares(numSquares));
     }
-  }, [dimensions, numSquares, generateSquares])
+  }, [dimensions, numSquares, generateSquares]);
 
   // Resize observer to update container dimensions
   useEffect(() => {
@@ -84,20 +84,20 @@ export function AnimatedGridPattern({
         setDimensions({
           width: entry.contentRect.width,
           height: entry.contentRect.height,
-        })
+        });
       }
-    })
+    });
 
     if (containerRef.current) {
-      resizeObserver.observe(containerRef.current)
+      resizeObserver.observe(containerRef.current);
     }
 
     return () => {
       if (containerRef.current) {
-        resizeObserver.unobserve(containerRef.current)
+        resizeObserver.unobserve(containerRef.current);
       }
-    }
-  }, [containerRef])
+    };
+  }, [containerRef]);
 
   return (
     <svg
@@ -105,7 +105,7 @@ export function AnimatedGridPattern({
       aria-hidden="true"
       className={cn(
         "pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30",
-        className
+        className,
       )}
       {...props}
     >
@@ -149,5 +149,5 @@ export function AnimatedGridPattern({
         ))}
       </svg>
     </svg>
-  )
+  );
 }

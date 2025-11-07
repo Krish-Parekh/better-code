@@ -8,12 +8,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import Link from "next/dist/client/link";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "../ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "../ui/form";
+import { useServerMutation } from "@/hooks/useMutation";
+import { Loader2 } from "lucide-react";
 
 const registerSchema = z.object({
   username: z.string().min(1).max(255),
@@ -21,8 +30,13 @@ const registerSchema = z.object({
   password: z.string().min(8).max(255),
 });
 
+type TRegisterSchema = z.infer<typeof registerSchema>;
+
+const KEY = "/auth/register"
+
 export default function RegisterForm() {
-  const form = useForm<z.infer<typeof registerSchema>>({
+  const { trigger, isMutating } = useServerMutation<TRegisterSchema, unknown>(KEY)
+  const form = useForm<TRegisterSchema>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       username: "",
@@ -31,20 +45,9 @@ export default function RegisterForm() {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof registerSchema>) => {
-    const response = await fetch("http://localhost:8000/api/v1/auth/register", {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (response.ok) {
-      console.log("Registered successfully");
-    } else {
-      console.log("Failed to register");
-    }
-  }
+  const onSubmit = async (data: TRegisterSchema) => {
+    await trigger(data);
+  };
 
   return (
     <div className="flex items-center justify-center w-full">
@@ -59,37 +62,57 @@ export default function RegisterForm() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField control={form.control} name="username" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="John Doe" />
-                    </FormControl>
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="email" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="john.doe@example.com" />
-                    </FormControl>
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="password" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Password" />
-                    </FormControl>
-                  </FormItem>
-                )} />
+              <form
+                className="space-y-4"
+                onSubmit={form.handleSubmit(onSubmit)}
+              >
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="John Doe" />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="john.doe@example.com" />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Password" />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </form>
             </Form>
           </CardContent>
           <CardFooter>
-            <Button onClick={form.handleSubmit(onSubmit)} type="submit" className="w-full py-2 font-medium cursor-pointer">
-              Create account
+            <Button
+              onClick={form.handleSubmit(onSubmit)}
+              type="submit"
+              disabled={isMutating}
+              className="w-full py-2 font-medium cursor-pointer"
+            >
+              {isMutating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create account"}
             </Button>
           </CardFooter>
         </Card>
