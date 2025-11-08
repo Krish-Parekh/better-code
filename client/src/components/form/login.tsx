@@ -22,14 +22,30 @@ import {
   FormControl,
   FormMessage,
 } from "../ui/form";
-
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useServerMutation } from "@/hooks/useMutation";
+import { Loader2 } from "lucide-react";
 const loginSchema = z.object({
   email: z.email().max(255),
   password: z.string().min(8).max(255),
 });
 
+type TLoginSchema = z.infer<typeof loginSchema>;
+const KEY = "/auth/login";
+
 export default function LoginForm() {
-  const form = useForm<z.infer<typeof loginSchema>>({
+  const router = useRouter();
+  const { trigger, isMutating } = useServerMutation<TLoginSchema, unknown>(
+    KEY,
+    {
+      onSuccess: () => {
+        toast.success("Logged in successfully");
+        router.push("/problems");
+      },
+    },
+  );
+  const form = useForm<TLoginSchema>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -37,7 +53,9 @@ export default function LoginForm() {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof loginSchema>) => {};
+  const onSubmit = async (data: TLoginSchema) => {
+    await trigger(data);
+  };
   return (
     <div className="flex items-center justify-center w-full">
       <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
@@ -49,7 +67,7 @@ export default function LoginForm() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action="#" method="post" className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <Form {...form}>
                 <FormField
                   control={form.control}
@@ -90,9 +108,11 @@ export default function LoginForm() {
           </CardContent>
           <CardFooter>
             <Button
-              type="submit"
               className="w-full py-2 font-medium cursor-pointer"
+              disabled={isMutating}
+              onClick={form.handleSubmit(onSubmit)}
             >
+              {isMutating && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Login
             </Button>
           </CardFooter>

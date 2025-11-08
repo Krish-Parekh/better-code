@@ -13,16 +13,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import Link from "next/dist/client/link";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from "../ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "../ui/form";
 import { useServerMutation } from "@/hooks/useMutation";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const registerSchema = z.object({
   username: z.string().min(1).max(255),
@@ -32,10 +27,19 @@ const registerSchema = z.object({
 
 type TRegisterSchema = z.infer<typeof registerSchema>;
 
-const KEY = "/auth/register"
+const KEY = "/auth/register";
 
 export default function RegisterForm() {
-  const { trigger, isMutating } = useServerMutation<TRegisterSchema, unknown>(KEY)
+  const router = useRouter();
+  const { trigger, isMutating } = useServerMutation<TRegisterSchema, unknown>(
+    KEY,
+    {
+      onSuccess: () => {
+        toast.success("Account created successfully");
+        router.push("/login");
+      },
+    },
+  );
   const form = useForm<TRegisterSchema>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -112,7 +116,11 @@ export default function RegisterForm() {
               disabled={isMutating}
               className="w-full py-2 font-medium cursor-pointer"
             >
-              {isMutating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create account"}
+              {isMutating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Create account"
+              )}
             </Button>
           </CardFooter>
         </Card>
