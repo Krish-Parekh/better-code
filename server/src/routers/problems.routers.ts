@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { getAllProblems, getProblemById } from "../controllers/problems.controller";
+import {
+	getAllProblems,
+	getProblemById,
+} from "../controllers/problems.controller";
 
 const router = Router();
 
