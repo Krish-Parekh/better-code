@@ -18,10 +18,10 @@ interface TestCasesProps {
   testCaseStatuses?: Record<string, TestCaseStatus>;
 }
 
-export default function TestCases({ 
-  testCases = [], 
+export default function TestCases({
+  testCases = [],
   actualOutputs = {},
-  testCaseStatuses = {}
+  testCaseStatuses = {},
 }: TestCasesProps) {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
@@ -59,8 +59,9 @@ export default function TestCases({
               className={cn(
                 "px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap",
                 selectedIndex === index
-                  ? getStatusColor(status) + " ring-2 ring-offset-2 ring-offset-background ring-ring"
-                  : getStatusColor(status)
+                  ? getStatusColor(status) +
+                      " ring-2 ring-offset-2 ring-offset-background ring-ring"
+                  : getStatusColor(status),
               )}
             >
               Test Case {index + 1}
@@ -68,30 +69,36 @@ export default function TestCases({
           );
         })}
       </div>
-      
+
       <div className="flex-1 overflow-y-auto p-4">
         {selectedTestCase && (
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium mb-2 text-muted-foreground">Test Case:</p>
+              <p className="text-sm font-medium mb-2 text-muted-foreground">
+                Test Case:
+              </p>
               <pre className="bg-muted p-3 rounded-md text-sm overflow-x-auto">
                 <code>{selectedTestCase.input}</code>
               </pre>
             </div>
-            
+
             <Separator />
-            
+
             <div>
-              <p className="text-sm font-medium mb-2 text-muted-foreground">Expected Output:</p>
+              <p className="text-sm font-medium mb-2 text-muted-foreground">
+                Expected Output:
+              </p>
               <pre className="bg-muted p-3 rounded-md text-sm overflow-x-auto">
                 <code>{selectedTestCase.output}</code>
               </pre>
             </div>
-            
+
             <Separator />
-            
+
             <div>
-              <p className="text-sm font-medium mb-2 text-muted-foreground">Actual Output:</p>
+              <p className="text-sm font-medium mb-2 text-muted-foreground">
+                Actual Output:
+              </p>
               <pre className="bg-muted p-3 rounded-md text-sm overflow-x-auto min-h-[60px]">
                 <code>{actualOutputs[selectedTestCase.id] || ""}</code>
               </pre>
@@ -102,4 +109,3 @@ export default function TestCases({
     </div>
   );
 }
-

@@ -1,8 +1,12 @@
 "use client";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { useServerQuery } from "@/hooks/useQuery";
-import { MDXRemote, type MDXRemoteSerializeResult } from 'next-mdx-remote'
-import { serialize } from 'next-mdx-remote/serialize'
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
+import { serialize } from "next-mdx-remote/serialize";
 import { useState, useEffect } from "react";
 import { useMDXComponents } from "@/hooks/useMDX";
 import { useParams } from "next/navigation";
@@ -40,7 +44,9 @@ interface IResponse {
 export default function ProblemPage() {
   const { id } = useParams();
   const { data: problem } = useServerQuery<IResponse>(`${KEY}/${id}`);
-  const [mdxSource, setMdxSource] = useState<MDXRemoteSerializeResult | null>(null);
+  const [mdxSource, setMdxSource] = useState<MDXRemoteSerializeResult | null>(
+    null,
+  );
   useEffect(() => {
     const fetchMdxSource = async () => {
       if (problem?.data?.bodyMdx) {
@@ -51,7 +57,7 @@ export default function ProblemPage() {
   }, [problem?.data?.bodyMdx]);
   return (
     <div className="h-screen max-h-screen overflow-hidden">
-       <div className="p-3 flex justify-between items-center">
+      <div className="p-3 flex justify-between items-center">
         <Link href="/problems">
           <ArrowLeftIcon className="size-6 cursor-pointer" />
         </Link>
@@ -61,9 +67,7 @@ export default function ProblemPage() {
             <Button variant="outline" size="icon" disabled>
               <PlayIcon className="size-4" />
             </Button>
-            <Button 
-              className="bg-green-500 text-white hover:bg-green-600/90 disabled:opacity-50"
-            >
+            <Button className="bg-green-500 text-white hover:bg-green-600/90 disabled:opacity-50">
               Submit
             </Button>
           </ButtonGroup>
@@ -71,9 +75,11 @@ export default function ProblemPage() {
       </div>
       <ResizablePanelGroup direction="horizontal" className="h-screen">
         <ResizablePanel defaultSize={30}>
-          {mdxSource && <div className="h-full w-full p-4 overflow-y-scroll">
-            <MDXRemote {...mdxSource} components={useMDXComponents}/>
-          </div>}
+          {mdxSource && (
+            <div className="h-full w-full p-4 overflow-y-scroll">
+              <MDXRemote {...mdxSource} components={useMDXComponents} />
+            </div>
+          )}
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={60}>
@@ -89,5 +95,5 @@ export default function ProblemPage() {
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
-  )
+  );
 }

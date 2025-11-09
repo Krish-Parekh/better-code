@@ -13,16 +13,41 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import Link from "next/dist/client/link";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "../ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "../ui/form";
 import { useServerMutation } from "@/hooks/useMutation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const registerSchema = z.object({
-  username: z.string().min(1).max(255),
-  email: z.email().max(255),
-  password: z.string().min(8).max(255),
+  username: z
+    .string()
+    .min(1, "Username is required")
+    .max(255, "Username must be at most 255 characters")
+    .regex(
+      /^[a-zA-Z0-9_-]+$/,
+      "Username can only contain letters, numbers, underscores, and hyphens",
+    ),
+  email: z
+    .email("Please enter a valid email address")
+    .min(1, "Email is required")
+    .max(255, "Email must be at most 255 characters"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .min(8, "Password must be at least 8 characters")
+    .max(255, "Password must be at most 255 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number",
+    ),
 });
 
 type TRegisterSchema = z.infer<typeof registerSchema>;
@@ -47,6 +72,7 @@ export default function RegisterForm() {
       email: "",
       password: "",
     },
+    mode: "onChange",
   });
 
   const onSubmit = async (data: TRegisterSchema) => {
@@ -77,8 +103,14 @@ export default function RegisterForm() {
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="John Doe" />
+                        <Input
+                          {...field}
+                          type="text"
+                          placeholder="johndoe"
+                          autoComplete="username"
+                        />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -89,8 +121,14 @@ export default function RegisterForm() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="john.doe@example.com" />
+                        <Input
+                          {...field}
+                          type="email"
+                          placeholder="john.doe@example.com"
+                          autoComplete="email"
+                        />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -101,8 +139,14 @@ export default function RegisterForm() {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Password" />
+                        <Input
+                          {...field}
+                          type="password"
+                          placeholder="Password"
+                          autoComplete="new-password"
+                        />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

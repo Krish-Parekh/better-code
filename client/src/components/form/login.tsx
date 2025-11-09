@@ -27,8 +27,14 @@ import { useRouter } from "next/navigation";
 import { useServerMutation } from "@/hooks/useMutation";
 import { Loader2 } from "lucide-react";
 const loginSchema = z.object({
-  email: z.email().max(255),
-  password: z.string().min(8).max(255),
+  email: z
+    .email("Please enter a valid email address")
+    .min(1, "Email is required")
+    .max(255, "Email must be at most 255 characters"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .max(255, "Password must be at most 255 characters"),
 });
 
 type TLoginSchema = z.infer<typeof loginSchema>;
@@ -51,6 +57,7 @@ export default function LoginForm() {
       email: "",
       password: "",
     },
+    mode: "onChange",
   });
 
   const onSubmit = async (data: TLoginSchema) => {
@@ -78,7 +85,8 @@ export default function LoginForm() {
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="ephraim@blocks.so"
+                          placeholder="john.doe@example.com"
+                          autoComplete="email"
                           {...field}
                         />
                       </FormControl>
@@ -96,6 +104,7 @@ export default function LoginForm() {
                         <Input
                           type="password"
                           placeholder="Password"
+                          autoComplete="current-password"
                           {...field}
                         />
                       </FormControl>
