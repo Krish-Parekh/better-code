@@ -1,9 +1,9 @@
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import authRouter from "./routers/auth.routers";
-import cookieParser from "cookie-parser";
 
 dotenv.config({
 	path: ".env",
