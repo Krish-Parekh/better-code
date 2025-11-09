@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import Editor from "@monaco-editor/react";
 
 const pythonCode = `def twoSum(nums, target):
@@ -16,6 +17,8 @@ if __name__ == "__main__":
 `;
 
 export default function CodeEditor() {
+  const [code, setCode] = useState<string>(pythonCode);
+
   return (
     <Editor
       options={{
@@ -26,7 +29,8 @@ export default function CodeEditor() {
       width="100%"
       theme="vs-dark"
       language="python"
-      value={pythonCode}
+      value={code}
+      onChange={(value) => setCode(value || "")}
     />
   );
 }

@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
   transpilePackages: ["next-mdx-remote"],
+  productionBrowserSourceMaps: false,
 };
 
 const withMDX = createMDX({

@@ -18,6 +18,7 @@ import { Loader2 } from "lucide-react";
 import { ArrowLeftIcon } from "lucide-react";
 import { PlayIcon } from "lucide-react";
 import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const KEY = `/problems`;
 
 interface TestCase {
@@ -58,10 +59,13 @@ export default function ProblemPage() {
   return (
     <div className="h-screen max-h-screen overflow-hidden">
       <div className="p-3 flex justify-between items-center">
-        <Link href="/problems">
-          <ArrowLeftIcon className="size-6 cursor-pointer" />
-        </Link>
-        <h1 className="text-2xl font-bold">{problem?.data?.title}</h1>
+        <div className="flex items-center gap-2">
+          <Link href="/problems">
+            <ArrowLeftIcon className="size-6 cursor-pointer" />
+          </Link>
+          <h1 className="text-2xl font-bold">{problem?.data?.title}</h1>
+
+        </div>
         <div className="flex">
           <ButtonGroup>
             <Button variant="outline" size="icon" disabled>
@@ -71,7 +75,7 @@ export default function ProblemPage() {
               Submit
             </Button>
           </ButtonGroup>
-        </div>
+        </div>  
       </div>
       <ResizablePanelGroup direction="horizontal" className="h-screen">
         <ResizablePanel defaultSize={30}>
