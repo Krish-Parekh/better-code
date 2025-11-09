@@ -1,3 +1,5 @@
+"use client";
+
 import { getFetcher } from "@/lib/fetcher";
 import useSWR, { type SWRConfiguration } from "swr";
 

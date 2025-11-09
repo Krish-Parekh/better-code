@@ -7,6 +7,7 @@ import { problemCompanies } from "../db/schema/problem_companies";
 import { companies } from "../db/schema/companies";
 import { eq } from "drizzle-orm";
 import type { UUID } from "node:crypto";
+import { testCases } from "../db/schema/test_cases";
 
 async function getAllProblems(_request: Request, response: Response, next: NextFunction) {
     try {
@@ -64,11 +65,43 @@ async function getAllProblems(_request: Request, response: Response, next: NextF
 export async function getProblemById(request: Request, response: Response, next: NextFunction) {
     try {
         const { id } = request.params;
-        const problem = await db.select().from(problems).where(eq(problems.id, id as unknown as UUID));
-        const payload: IResponse<typeof problem[0]> = {
+        const problemWithTestCases = await db
+            .select({
+                id: problems.id,
+                title: problems.title,
+                bodyMdx: problems.bodyMdx,
+                createdAt: problems.createdAt,
+                updatedAt: problems.updatedAt,
+                testCaseId: testCases.id,
+                testCaseInput: testCases.input,
+                testCaseOutput: testCases.output,
+            })
+            .from(problems)
+            .leftJoin(testCases, eq(problems.id, testCases.problemId))
+            .where(eq(problems.id, id as unknown as UUID));
+
+        const problem = problemWithTestCases[0];
+        const testCasesData = problemWithTestCases
+            .filter(row => row.testCaseId)
+            .map(row => ({
+                id: row.testCaseId,
+                input: row.testCaseInput,
+                output: row.testCaseOutput,
+            }));
+
+        const result = {
+            id: problem?.id,
+            title: problem?.title,
+            bodyMdx: problem?.bodyMdx,
+            createdAt: problem?.createdAt,
+            updatedAt: problem?.updatedAt,
+            testCases: testCasesData,
+        };
+
+        const payload: IResponse<typeof result> = {
             status: StatusCodes.OK,
             message: ReasonPhrases.OK,
-            data: problem[0] || { id: "", title: "", bodyMdx: "", createdAt: new Date(), updatedAt: new Date() },
+            data: result,
         };
         return response.status(StatusCodes.OK).json(payload);
     }
