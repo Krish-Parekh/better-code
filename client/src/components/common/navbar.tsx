@@ -9,6 +9,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const isProblemsPage = pathname === "/problems";
   const [searchQuery, setSearchQuery] = useState("");
+
   return (
     <nav className="border-b-2 border-dashed border-gray-200 flex justify-between items-center">
       <Link className="p-4" href="/">

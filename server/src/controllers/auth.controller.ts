@@ -166,6 +166,7 @@ export const login = async (
 			refreshToken,
 			createCookieOptions({
 				expires: refreshTokenExpiresAt,
+				path: "/api/v1/auth/refresh",
 			}),
 		);
 
