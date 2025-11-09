@@ -3,10 +3,12 @@ import {
 	getAllProblems,
 	getProblemById,
 } from "../controllers/problems.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
+
 
 const router = Router();
 
-router.get("/", getAllProblems);
-router.get("/:id", getProblemById);
+router.get("/", authMiddleware, getAllProblems);
+router.get("/:id", authMiddleware, getProblemById);
 
 export default router;
