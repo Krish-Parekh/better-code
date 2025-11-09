@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import express from "express";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import authRouter from "./routers/auth.routers";
+import problemsRouter from "./routers/problems.routers";
 
 dotenv.config({
 	path: ".env",
@@ -16,6 +17,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/problems", problemsRouter);
 
 app.use(errorMiddleware);
 
