@@ -15,7 +15,7 @@ export default function Navbar() {
         <h1 className="text-2xl font-bold">BetterCode</h1>
       </Link>
       {isProblemsPage ? (
-        <div className="w-96">
+        <div className="w-96 p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 size-4" />
             <Input

@@ -4,7 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import AppProviders from "@/providers";
 import { Toaster } from "sonner";
-import { SmoothCursor } from "@/components/ui/smooth-cursor"
+import { SmoothCursor } from "@/components/ui/smooth-cursor";
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-bricole",

@@ -36,6 +36,20 @@ async function fetcher({ url, init, error }: IFetcherParams) {
   }
 }
 
+export function getFetcher(baseURL: string) {
+  return (key: string) =>
+    fetcher({
+      url: baseURL + key,
+      init: {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+      error: "An error occurred while getting the data.",
+    });
+}
+
 export function postJsonFetcher(baseURL: string) {
   return <ExtraArgs>(key: string, options?: Readonly<{ arg: ExtraArgs }>) => {
     return fetcher({
