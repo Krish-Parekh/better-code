@@ -9,6 +9,10 @@ interface IFetcherParams {
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
+function triggerLogout(): void {
+  window.dispatchEvent(new CustomEvent("auth:logout"));
+}
+
 async function refreshToken(): Promise<boolean> {
   if (isRefreshing && refreshPromise) {
     return refreshPromise;
@@ -27,17 +31,13 @@ async function refreshToken(): Promise<boolean> {
       });
 
       if (!response.ok) {
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("auth:logout"));
-        }
+        triggerLogout();
         return false;
       }
 
       return true;
     } catch (error) {
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("auth:logout"));
-      }
+      triggerLogout();
       return false;
     } finally {
       isRefreshing = false;
@@ -91,9 +91,7 @@ async function fetcher({ url, init, error }: IFetcherParams) {
         }
 
         if (retryResponse.status === 401) {
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("auth:logout"));
-          }
+          triggerLogout();
           throw new Error("Session expired. Please login again.");
         }
       } else {
