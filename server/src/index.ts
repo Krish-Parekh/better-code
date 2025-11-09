@@ -12,7 +12,12 @@ dotenv.config({
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+	origin: process.env.FRONTEND_URL!,
+	allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+	credentials: true,
+}));
+
 app.use(cookieParser());
 app.use(express.json());
 

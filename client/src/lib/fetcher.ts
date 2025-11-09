@@ -9,11 +9,7 @@ interface IFetcherParams {
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
-/**
- * Refresh the access token using the refresh token cookie
- */
 async function refreshToken(): Promise<boolean> {
-  // If already refreshing, return the existing promise
   if (isRefreshing && refreshPromise) {
     return refreshPromise;
   }
@@ -27,11 +23,10 @@ async function refreshToken(): Promise<boolean> {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Include cookies for refresh token
+        credentials: "include",
       });
 
       if (!response.ok) {
-        // Refresh failed - trigger logout
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("auth:logout"));
         }
@@ -40,8 +35,6 @@ async function refreshToken(): Promise<boolean> {
 
       return true;
     } catch (error) {
-      console.error("Failed to refresh token:", error);
-      // Trigger logout on error
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("auth:logout"));
       }
@@ -57,7 +50,6 @@ async function refreshToken(): Promise<boolean> {
 
 async function fetcher({ url, init, error }: IFetcherParams) {
   try {
-    // Ensure credentials are included to send cookies
     const response = await fetch(url, {
       ...init,
       credentials: "include",
@@ -74,12 +66,10 @@ async function fetcher({ url, init, error }: IFetcherParams) {
       json = {};
     }
 
-    // Handle 401 Unauthorized - try to refresh token
     if (response.status === 401) {
       const refreshed = await refreshToken();
       
       if (refreshed) {
-        // Retry the original request after successful refresh
         const retryResponse = await fetch(url, {
           ...init,
           credentials: "include",
@@ -100,21 +90,13 @@ async function fetcher({ url, init, error }: IFetcherParams) {
           return retryJson;
         }
 
-        // If still 401 after refresh, logout
         if (retryResponse.status === 401) {
           if (typeof window !== "undefined") {
             window.dispatchEvent(new CustomEvent("auth:logout"));
           }
           throw new Error("Session expired. Please login again.");
         }
-
-        throw new Error(
-          (retryJson as { error?: string; message?: string }).error ||
-            (retryJson as { message?: string }).message ||
-            error,
-        );
       } else {
-        // Refresh failed - logout already triggered in refreshToken
         throw new Error("Session expired. Please login again.");
       }
     }
