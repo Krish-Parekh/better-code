@@ -311,6 +311,7 @@ export const refresh = async (
 			refreshToken,
 			createCookieOptions({
 				expires: refreshTokenExpiresAt,
+				path: "/api/v1/auth/refresh",
 			}),
 		);
 

@@ -68,7 +68,7 @@ async function fetcher({ url, init, error }: IFetcherParams) {
 
     if (response.status === 401) {
       const refreshed = await refreshToken();
-      
+
       if (refreshed) {
         const retryResponse = await fetch(url, {
           ...init,

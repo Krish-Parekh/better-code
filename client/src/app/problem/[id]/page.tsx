@@ -64,7 +64,6 @@ export default function ProblemPage() {
             <ArrowLeftIcon className="size-6 cursor-pointer" />
           </Link>
           <h1 className="text-2xl font-bold">{problem?.data?.title}</h1>
-
         </div>
         <div className="flex">
           <ButtonGroup>
@@ -75,7 +74,7 @@ export default function ProblemPage() {
               Submit
             </Button>
           </ButtonGroup>
-        </div>  
+        </div>
       </div>
       <ResizablePanelGroup direction="horizontal" className="h-screen">
         <ResizablePanel defaultSize={30}>

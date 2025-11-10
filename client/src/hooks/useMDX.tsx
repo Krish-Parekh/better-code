@@ -45,10 +45,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       />
     ),
     p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
-      <p
-        className="text-base mb-4 leading-7 text-foreground"
-        {...props}
-      />
+      <p className="text-base mb-4 leading-7 text-foreground" {...props} />
     ),
     ul: (props: React.HTMLAttributes<HTMLUListElement>) => (
       <ul
@@ -72,7 +69,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     }: React.HTMLAttributes<HTMLElement> & { className?: string }) => {
       // Check if this is a code block (has language class) or inline code
       const isCodeBlock = className?.startsWith("language-");
-      
+
       if (isCodeBlock && className) {
         // Code block - remove language- prefix for display, keep for syntax highlighting
         const language = className.replace("language-", "");
@@ -86,7 +83,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
           </code>
         );
       }
-      
+
       // Inline code
       return (
         <code
@@ -111,7 +108,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
           language = codeClassName.replace("language-", "");
         }
       }
-      
+
       return (
         <div className="relative mb-6 rounded-lg overflow-hidden border border-border bg-card group">
           {language && (
@@ -155,7 +152,10 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       <tbody className="divide-y divide-border" {...props} />
     ),
     tr: (props: React.HTMLAttributes<HTMLTableRowElement>) => (
-      <tr className="border-b border-border hover:bg-muted/50 transition-colors" {...props} />
+      <tr
+        className="border-b border-border hover:bg-muted/50 transition-colors"
+        {...props}
+      />
     ),
     th: (props: React.HTMLAttributes<HTMLTableCellElement>) => (
       <th

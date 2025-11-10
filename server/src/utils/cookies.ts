@@ -4,9 +4,9 @@ export function createCookieOptions(
 	overrides?: Partial<CookieOptions>,
 ): CookieOptions {
 	const defaultOptions: CookieOptions = {
-		httpOnly: true,
-		secure: process.env.NODE_ENV === "prod",
-		sameSite: "strict",
+		httpOnly: false,
+		secure: process.env.NODE_ENV === "production",
+		sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 		path: "/",
 	};
 

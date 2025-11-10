@@ -2,7 +2,7 @@
 
 import { SWRConfig } from "swr";
 import LogoutHandler from "@/components/auth/logout-handler";
-import { CookiesProvider } from 'react-cookie';
+import { CookiesProvider } from "react-cookie";
 interface IProviderProps {
   children: React.ReactNode;
 }
@@ -15,6 +15,5 @@ export default function AppProviders({ children }: IProviderProps) {
         {children}
       </SWRConfig>
     </CookiesProvider>
-
   );
 }

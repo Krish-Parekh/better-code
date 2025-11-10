@@ -4,11 +4,19 @@ import { usePathname } from "next/navigation";
 import { Input } from "../ui/input";
 import { Search } from "lucide-react";
 import { useState } from "react";
-
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Cookies } from "react-cookie";
 export default function Navbar() {
   const pathname = usePathname();
   const isProblemsPage = pathname === "/problems";
   const [searchQuery, setSearchQuery] = useState("");
+  const cookies = new Cookies();
+  const accessToken = cookies.get("accessToken") || null;
+  const handleLogout = () => {
+    cookies.remove("accessToken");
+    cookies.remove("refreshToken", { path: "/api/v1/auth/refresh" });
+    window.dispatchEvent(new CustomEvent("auth:logout"));
+  };
 
   return (
     <nav className="border-b-2 border-dashed border-gray-200 flex justify-between items-center">
@@ -29,22 +37,56 @@ export default function Navbar() {
         </div>
       ) : (
         <div className="flex h-full">
-          <div className="h-full cursor-pointer min-w-32">
-            <Link
-              href="/login"
-              className="flex p-4 border-s-2 border-dashed border-gray-200 h-full items-center justify-center gap-4"
-            >
-              <h2 className="text-lg font-bold text-center">Login</h2>
-            </Link>
-          </div>
-          <div className="h-full cursor-pointer min-w-32">
-            <Link
-              href="/register"
-              className="flex p-4 border-s-2 border-dashed border-gray-200 h-full items-center justify-center gap-4"
-            >
-              <h2 className="text-lg font-bold text-center">Register</h2>
-            </Link>
-          </div>
+          {accessToken ? (
+            <>
+              <div
+                className="h-full cursor-pointer min-w-32"
+                onClick={handleLogout}
+              >
+                <div className="flex p-4 border-s-2 border-dashed border-gray-200 h-full items-center justify-center gap-4">
+                  <h2 className="text-lg font-bold text-center">Logout</h2>
+                </div>
+              </div>
+              <div className="h-full cursor-pointer min-w-32">
+                <Link
+                  href="/pricing"
+                  className="flex p-4 border-s-2 border-dashed border-gray-200 h-full items-center justify-center gap-4"
+                >
+                  <h2 className="text-lg font-bold text-center">Pricing</h2>
+                </Link>
+              </div>
+              <div className="h-full cursor-pointer min-w-32">
+                <Link
+                  href="/problems"
+                  className="flex p-4 border-s-2 border-dashed border-gray-200 h-full items-center justify-center gap-4"
+                >
+                  <Avatar className="size-10">
+                    <AvatarImage src="https://github.com/shadcn.png" />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="h-full cursor-pointer min-w-32">
+                <Link
+                  href="/login"
+                  className="flex p-4 border-s-2 border-dashed border-gray-200 h-full items-center justify-center gap-4"
+                >
+                  <h2 className="text-lg font-bold text-center">Login</h2>
+                </Link>
+              </div>
+              <div className="h-full cursor-pointer min-w-32">
+                <Link
+                  href="/register"
+                  className="flex p-4 border-s-2 border-dashed border-gray-200 h-full items-center justify-center gap-4"
+                >
+                  <h2 className="text-lg font-bold text-center">Register</h2>
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       )}
     </nav>
