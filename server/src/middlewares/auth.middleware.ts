@@ -1,29 +1,30 @@
 import type { NextFunction, Request, Response } from "express";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
+import type { IResponse } from "../types/main";
 
-interface JwtPayload {
-	id: string;
+interface DecodedToken {
+	userId: string;
 }
-
 export function authMiddleware(
 	request: Request,
 	response: Response,
 	next: NextFunction,
 ) {
-	const incomingAccessToken = request.cookies.accessToken;
-	if (!incomingAccessToken) {
-		return response.status(StatusCodes.UNAUTHORIZED).json({
-			status: StatusCodes.UNAUTHORIZED,
-			message: ReasonPhrases.UNAUTHORIZED,
-		});
-	}
 	try {
+		const accessToken = request.cookies.accessToken;
+		if (!accessToken) {
+			const payload: IResponse<unknown> = {
+				status: StatusCodes.UNAUTHORIZED,
+				message: ReasonPhrases.UNAUTHORIZED,
+			};
+			return response.status(StatusCodes.UNAUTHORIZED).json(payload);
+		}
 		const decoded = jwt.verify(
-			incomingAccessToken,
+			accessToken,
 			process.env.ACCESS_TOKEN_SECRET!,
-		) as JwtPayload;
-		const userId = decoded.id;
+		) as DecodedToken;
+		const userId = decoded.userId;
 		if (!userId) {
 			return response.status(StatusCodes.UNAUTHORIZED).json({
 				status: StatusCodes.UNAUTHORIZED,

@@ -5,6 +5,7 @@ import express from "express";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import authRouter from "./routers/auth.routers";
 import problemsRouter from "./routers/problems.routers";
+import "./utils/cleanup";
 
 dotenv.config({
 	path: ".env",
