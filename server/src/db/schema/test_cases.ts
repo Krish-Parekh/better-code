@@ -6,6 +6,8 @@ export const testCases = pgTable("test_cases", {
 	problemId: uuid("problem_id").references(() => problems.id, {
 		onDelete: "cascade",
 	}),
+	stdin: text("stdin").notNull(),
+	stdout: text("stdout").notNull(), 
 	input: text("input").notNull(),
 	output: text("output").notNull(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
