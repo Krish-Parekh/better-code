@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1762400257014,
-      "tag": "0000_striped_psynapse",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1762434520559,
-      "tag": "0001_conscious_jimmy_woo",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1762562782020,
-      "tag": "0002_flawless_masked_marvel",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1762823900916,
-      "tag": "0003_brainy_johnny_blaze",
+      "when": 1762828741262,
+      "tag": "0000_cultured_ink",
       "breakpoints": true
     }
   ]

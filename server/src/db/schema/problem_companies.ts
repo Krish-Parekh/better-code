@@ -1,4 +1,4 @@
-import { integer, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+import { integer, pgTable, primaryKey, timestamp, uuid } from "drizzle-orm/pg-core";
 import { companies } from "./companies";
 import { problems } from "./problems";
 
@@ -13,4 +13,6 @@ export const problemCompanies = pgTable("problem_companies", {
 	lastSeenYear: integer("last_seen_year").notNull(),
 	createdAt: timestamp("created_at").notNull().defaultNow(),
 	updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (table) => [
+	primaryKey({ columns: [table.problemId, table.companyId] }),
+]);
