@@ -5,9 +5,10 @@ import express from "express";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import authRouter from "./routers/auth.routers";
 import problemsRouter from "./routers/problems.routers";
-import "./db/seed/companies";
-import "./db/seed/problems";
-import "./db/seed/problem_companies";
+// import "./db/seed/companies";
+// import "./db/seed/problems";
+// import "./db/seed/problem_companies";
+// import "./db/seed/test_cases";
 import "./utils/cleanup";
 
 dotenv.config({

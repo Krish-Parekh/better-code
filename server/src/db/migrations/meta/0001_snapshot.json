@@ -1,6 +1,6 @@
 {
-  "id": "19249e10-cae5-47e1-a15f-a10bcce67cb6",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "07817fc2-6a8f-41d0-82ed-b91fb3549958",
+  "prevId": "19249e10-cae5-47e1-a15f-a10bcce67cb6",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -355,6 +355,12 @@
         },
         "output": {
           "name": "output",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "body_mdx": {
+          "name": "body_mdx",
           "type": "text",
           "primaryKey": false,
           "notNull": true

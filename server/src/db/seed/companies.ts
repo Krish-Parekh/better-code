@@ -24,4 +24,4 @@ async function seedCompanies() {
   console.log(`Companies in DB: ${inserted.length}`);
 }
 
-export default seedCompanies;
+await seedCompanies();
