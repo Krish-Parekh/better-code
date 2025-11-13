@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     wrapper: ({ children }: { children: React.ReactNode }) => (
-      <div className="mdx-content max-w-none">
+      <div className="mdx-content max-w-none pb-8 mb-8">
         {children}
       </div>
     ),

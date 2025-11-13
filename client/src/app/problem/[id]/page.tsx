@@ -66,12 +66,9 @@ export default function ProblemPage() {
   return (
     <div className="h-screen max-h-screen overflow-hidden">
       <div className="p-3 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <Link href="/problems">
-            <ArrowLeftIcon className="size-6 cursor-pointer" />
-          </Link>
-          <h1 className="text-2xl font-bold">{problem?.data?.title}</h1>
-        </div>
+        <Link href="/problems">
+          <ArrowLeftIcon className="size-6 cursor-pointer" />
+        </Link>
         <div className="flex">
           <ButtonGroup>
             <Button variant="outline" size="icon" disabled>
@@ -82,11 +79,15 @@ export default function ProblemPage() {
             </Button>
           </ButtonGroup>
         </div>
+        <Avatar>
+          <AvatarImage src="https://github.com/shadcn.png" />
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar>
       </div>
       <ResizablePanelGroup direction="horizontal" className="h-screen">
-        <ResizablePanel defaultSize={30}>
+        <ResizablePanel defaultSize={40}>
           {mdxSource && (
-            <div className="h-full w-full p-4 overflow-y-scroll">
+            <div className="h-full w-full p-4 pb-8 overflow-y-scroll">
               <MDXRemote {...mdxSource} components={useMDXComponents} />
             </div>
           )}
