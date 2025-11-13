@@ -62,10 +62,10 @@ export default function ProblemsTable() {
                   <Badge variant="outline"> Not Started </Badge>
                 </div>
                 <div className="border-l-2 border-dashed w-36 h-full border-gray-200/70  flex flex-col items-center justify-center gap-2">
-                  <div className="*:data-[slot=avatar]:ring-black/50 flex -space-x-2 *:data-[slot=avatar]:ring-1 max-w-36">
+                  <div className="flex -space-x-2 max-w-36">
                     {problem.companies.map((company) => {
                       return (
-                        <Avatar key={company.name}>
+                        <Avatar key={company.name} className="ring-1 ring-black/10 bg-white">
                           <AvatarImage src={company.logoUrl} />
                           <AvatarFallback>
                             {company.name.charAt(0)}

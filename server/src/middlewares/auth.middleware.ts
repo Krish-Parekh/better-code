@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import type { IResponse } from "../types/main";
 
 interface DecodedToken {
-	userId: string;
+	id: string;
 }
 export function authMiddleware(
 	request: Request,
@@ -24,7 +24,7 @@ export function authMiddleware(
 			accessToken,
 			process.env.ACCESS_TOKEN_SECRET!,
 		) as DecodedToken;
-		const userId = decoded.userId;
+		const userId = decoded.id;
 		if (!userId) {
 			return response.status(StatusCodes.UNAUTHORIZED).json({
 				status: StatusCodes.UNAUTHORIZED,

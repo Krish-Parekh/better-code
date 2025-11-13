@@ -9,6 +9,7 @@ import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import { useState, useEffect } from "react";
 import { useMDXComponents } from "@/hooks/useMDX";
+import remarkGfm from "remark-gfm";
 import { useParams } from "next/navigation";
 import CodeEditor from "@/components/problem/code-editor";
 import TestCases from "@/components/problem/test-cases";
@@ -51,7 +52,13 @@ export default function ProblemPage() {
   useEffect(() => {
     const fetchMdxSource = async () => {
       if (problem?.data?.bodyMdx) {
-        setMdxSource(await serialize(problem?.data?.bodyMdx));
+        setMdxSource(
+          await serialize(problem?.data?.bodyMdx, {
+            mdxOptions: {
+              remarkPlugins: [remarkGfm],
+            },
+          })
+        );
       }
     };
     fetchMdxSource();
