@@ -35,7 +35,7 @@ interface Problem {
   createdAt: string;
   updatedAt: string;
   metadata: {
-    templates: Record<string, string>
+    templates: Record<string, string>;
   };
   testCases: TestCase[];
 }
@@ -60,7 +60,7 @@ export default function ProblemPage() {
             mdxOptions: {
               remarkPlugins: [remarkGfm],
             },
-          })
+          }),
         );
       }
     };
@@ -99,7 +99,11 @@ export default function ProblemPage() {
         <ResizablePanel defaultSize={60}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={60}>
-              {problem?.data?.metadata?.templates?.python && <CodeEditor initialCode={problem?.data?.metadata?.templates?.python} />}
+              {problem?.data?.metadata?.templates?.python && (
+                <CodeEditor
+                  initialCode={problem?.data?.metadata?.templates?.python}
+                />
+              )}
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={40}>

@@ -5,9 +5,7 @@ import { cn } from "@/lib/utils";
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     wrapper: ({ children }: { children: React.ReactNode }) => (
-      <div className="mdx-content max-w-none pb-8 mb-8">
-        {children}
-      </div>
+      <div className="mdx-content max-w-none pb-8 mb-8">{children}</div>
     ),
     h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
       <h1
@@ -69,12 +67,12 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       ...props
     }: React.HTMLAttributes<HTMLElement> & { className?: string }) => {
       const isCodeBlock = className?.startsWith("language-");
-      const content = typeof children === 'string' ? children : '';
-      const hasNewlines = content.includes('\n');
+      const content = typeof children === "string" ? children : "";
+      const hasNewlines = content.includes("\n");
 
       if (isCodeBlock || (hasNewlines && !className)) {
         return (
-          <code className={className || ''} {...props}>
+          <code className={className || ""} {...props}>
             {children}
           </code>
         );
@@ -96,7 +94,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     }: React.HTMLAttributes<HTMLPreElement>) => {
       // Extract language from code element if present
       let language = "";
-      
+
       // Check if children is a code element
       if (React.isValidElement(children)) {
         const codeProps = children.props as { className?: string };
@@ -109,7 +107,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       // Also check React children array in case of multiple children
       const childrenArray = React.Children.toArray(children);
       const codeChild = childrenArray.find(
-        (child) => React.isValidElement(child) && child.type === "code"
+        (child) => React.isValidElement(child) && child.type === "code",
       ) as React.ReactElement<{ className?: string }> | undefined;
 
       if (codeChild && !language) {
@@ -130,7 +128,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
             className={cn(
               "bg-card text-card-foreground p-5 overflow-x-auto text-sm font-mono leading-relaxed whitespace-pre",
               language && "pt-10",
-              className
+              className,
             )}
             {...props}
           >

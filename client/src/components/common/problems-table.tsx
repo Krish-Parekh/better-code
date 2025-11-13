@@ -65,7 +65,10 @@ export default function ProblemsTable() {
                   <div className="flex -space-x-2 max-w-36">
                     {problem.companies.map((company) => {
                       return (
-                        <Avatar key={company.name} className="ring-1 ring-black/10 bg-white">
+                        <Avatar
+                          key={company.name}
+                          className="ring-1 ring-black/10 bg-white"
+                        >
                           <AvatarImage src={company.logoUrl} />
                           <AvatarFallback>
                             {company.name.charAt(0)}
