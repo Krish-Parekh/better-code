@@ -16,9 +16,12 @@ if __name__ == "__main__":
         print(' '.join(map(str, result)))
 `;
 
-export default function CodeEditor() {
-  const [code, setCode] = useState<string>(pythonCode);
+interface CodeEditorProps {
+  initialCode: string;
+}
 
+export default function CodeEditor({ initialCode }: CodeEditorProps) {
+  const [code, setCode] = useState<string>(initialCode);
   return (
     <Editor
       options={{
@@ -28,7 +31,7 @@ export default function CodeEditor() {
       height="100%"
       width="100%"
       theme="vs-dark"
-      language="python"
+      language={"python"}
       value={code}
       onChange={(value) => setCode(value || "")}
     />

@@ -84,6 +84,7 @@ export async function getProblemById(
 				bodyMdx: problems.bodyMdx,
 				createdAt: problems.createdAt,
 				updatedAt: problems.updatedAt,
+				metadata: problems.metadata,
 				testCaseId: testCases.id,
 				testCaseInput: testCases.input,
 				testCaseOutput: testCases.output,
@@ -108,6 +109,7 @@ export async function getProblemById(
 			createdAt: problem?.createdAt,
 			updatedAt: problem?.updatedAt,
 			testCases: testCasesData,
+			metadata: problem?.metadata,
 		};
 
 		const payload: IResponse<typeof result> = {

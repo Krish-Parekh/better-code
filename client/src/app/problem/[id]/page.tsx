@@ -34,6 +34,9 @@ interface Problem {
   bodyMdx: string;
   createdAt: string;
   updatedAt: string;
+  metadata: {
+    templates: Record<string, string>
+  };
   testCases: TestCase[];
 }
 
@@ -96,7 +99,7 @@ export default function ProblemPage() {
         <ResizablePanel defaultSize={60}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={60}>
-              <CodeEditor />
+              {problem?.data?.metadata?.templates?.python && <CodeEditor initialCode={problem?.data?.metadata?.templates?.python} />}
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={40}>
