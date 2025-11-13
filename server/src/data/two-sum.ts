@@ -1,11 +1,11 @@
 interface Templates {
-    python: string;
-    javascript: string;
-    java: string;
+	python: string;
+	javascript: string;
+	java: string;
 }
 
 export const twoSumTemplates: Templates = {
-    python: `# Python - Two Sum
+	python: `# Python - Two Sum
   class Solution:
       def solve(self, nums, target):
           # TODO: implement
@@ -22,7 +22,7 @@ export const twoSumTemplates: Templates = {
       ans = Solution().solve(nums, target)
       print(ans)
   `,
-    javascript: `// JavaScript (Node) - Two Sum
+	javascript: `// JavaScript (Node) - Two Sum
   class Solution {
     solve(nums, target) {
       // TODO: implement
@@ -41,7 +41,7 @@ export const twoSumTemplates: Templates = {
     console.log(Array.isArray(res) ? \`[\${res[0]},\${res[1]}]\` : res);
   })();
   `,
-    java: `// Java - Two Sum
+	java: `// Java - Two Sum
   import java.util.*;
   public class Solution {
       public int[] solve(int[] nums, int target) {

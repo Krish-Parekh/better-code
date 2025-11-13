@@ -5,6 +5,7 @@ import express from "express";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import authRouter from "./routers/auth.routers";
 import problemsRouter from "./routers/problems.routers";
+import submissionsRouter from "./routers/submissions.routers";
 // import "./db/seed/companies";
 // import "./db/seed/problems";
 // import "./db/seed/problem_companies";
@@ -30,6 +31,7 @@ app.use(express.json());
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/problems", problemsRouter);
+app.use("/api/v1/submissions", submissionsRouter);
 
 app.use(errorMiddleware);
 

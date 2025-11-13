@@ -1,11 +1,11 @@
 interface Templates {
-    python: string;
-    javascript: string;
-    java: string;
-  }
-  
-  export const subarraySumTemplates: Templates = {
-    python: `# Python - Subarray Sum Equals K
+	python: string;
+	javascript: string;
+	java: string;
+}
+
+export const subarraySumTemplates: Templates = {
+	python: `# Python - Subarray Sum Equals K
   class Solution:
       def solve(self, nums, k):
           # TODO: implement
@@ -22,7 +22,7 @@ interface Templates {
       ans = Solution().solve(nums, k)
       print(ans)
   `,
-    javascript: `// JavaScript (Node) - Subarray Sum Equals K
+	javascript: `// JavaScript (Node) - Subarray Sum Equals K
   class Solution {
     solve(nums, k) {
       // TODO: implement
@@ -41,7 +41,7 @@ interface Templates {
     console.log(res);
   })();
   `,
-    java: `// Java - Subarray Sum Equals K
+	java: `// Java - Subarray Sum Equals K
   import java.util.*;
   public class Solution {
       public int solve(int[] nums, int k) {
@@ -60,9 +60,9 @@ interface Templates {
       }
   }
   `,
-  };
-  
-  export const subarraySumMdx: string = `
+};
+
+export const subarraySumMdx: string = `
   # Subarray Sum Equals K
   
   Given an array of integers \`nums\` and an integer \`k\`, return the **total number of continuous subarrays** whose sum equals to \`k\`.
@@ -113,4 +113,3 @@ interface Templates {
   | Brute Force | O(n²) | O(1) |
   | Prefix Sum + Hash Map (Optimal) | O(n) | O(n) |
   `;
-  

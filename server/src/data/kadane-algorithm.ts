@@ -1,11 +1,11 @@
 interface Templates {
-    python: string;
-    javascript: string;
-    java: string;
-  }
-  
-  export const maximumSubarrayTemplates: Templates = {
-    python: `# Python - Maximum Subarray (Kadane)
+	python: string;
+	javascript: string;
+	java: string;
+}
+
+export const maximumSubarrayTemplates: Templates = {
+	python: `# Python - Maximum Subarray (Kadane)
   class Solution:
       def solve(self, nums):
           # TODO: implement Kadane's algorithm
@@ -21,7 +21,7 @@ interface Templates {
       ans = Solution().solve(nums)
       print(ans)
   `,
-    javascript: `// JavaScript (Node) - Maximum Subarray (Kadane)
+	javascript: `// JavaScript (Node) - Maximum Subarray (Kadane)
   class Solution {
     solve(nums) {
       // TODO: implement Kadane's algorithm
@@ -39,7 +39,7 @@ interface Templates {
     console.log(res);
   })();
   `,
-    java: `// Java - Maximum Subarray (Kadane)
+	java: `// Java - Maximum Subarray (Kadane)
   import java.util.*;
   public class Solution {
       public long solve(int[] nums) {
@@ -57,9 +57,9 @@ interface Templates {
       }
   }
   `,
-  };
-  
-  export const maximumSubarrayMdx: string = `
+};
+
+export const maximumSubarrayMdx: string = `
   # Maximum Subarray (Kadane’s Algorithm)
   
   Given an integer array \`nums\`, find the **contiguous subarray** (containing at least one number) which has the **largest sum**, and return its sum.
@@ -108,4 +108,3 @@ interface Templates {
   | Brute Force | O(n²) | O(1) |
   | Kadane’s (Optimal) | O(n) | O(1) |
   `;
-  
