@@ -1,10 +1,12 @@
 import { Router } from "express";
-import { createSubmission, getSubmissionStatus } from "../controllers/submission.controller";
-import { authMiddleware } from "../middlewares/auth.middleware";
+import {
+	createSubmission,
+	getSubmissionStatus,
+} from "../controllers/submission.controller";
 
 const submissionsRouter = Router();
 
-submissionsRouter.post("/", authMiddleware, createSubmission);
-submissionsRouter.get("/:jobId/status", authMiddleware, getSubmissionStatus);
+submissionsRouter.post("/", createSubmission);
+submissionsRouter.get("/:jobId/status", getSubmissionStatus);
 
 export default submissionsRouter;

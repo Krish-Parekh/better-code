@@ -6,8 +6,8 @@ import {
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
-import { problems } from "./problems";
 import { user } from "./auth";
+import { problems } from "./problems";
 export const languages = pgEnum("language", ["cpp", "python", "java"]);
 export const submissionStatus = pgEnum("submission_status", [
 	"PENDING",
