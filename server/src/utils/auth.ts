@@ -1,18 +1,18 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import db from "../db";
-import { user } from "../db/schema/auth";
-import { session } from "../db/schema/auth";
-import { account } from "../db/schema/auth";
+import { account, session, user } from "../db/schema/auth";
+import { EmailService } from "./email";
 
+const emailService = new EmailService();
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {
 		provider: "pg",
-        schema: {
-            user: user,
-            session: session,
-            account: account,
-        }
+		schema: {
+			user: user,
+			session: session,
+			account: account,
+		},
 	}),
 	secret: process.env.BETTER_AUTH_SECRET!,
 	url: process.env.BETTER_AUTH_URL!,
@@ -28,7 +28,7 @@ export const auth = betterAuth({
 	},
 	emailVerification: {
 		sendVerificationEmail: async ({ user, url, token }, request) => {
-			console.log(user, url, token, request);
+			await emailService.sendVerificationEmail(user.email, url);
 		},
 	},
 });
