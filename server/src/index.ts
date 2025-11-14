@@ -6,11 +6,6 @@ import { errorMiddleware } from "./middlewares/error.middleware";
 import authRouter from "./routers/auth.routers";
 import problemsRouter from "./routers/problems.routers";
 import submissionsRouter from "./routers/submissions.routers";
-// import "./db/seed/companies";
-// import "./db/seed/problems";
-// import "./db/seed/problem_companies";
-// import "./db/seed/test_cases";
-import "./utils/cleanup";
 
 dotenv.config({
 	path: ".env",
@@ -21,6 +16,7 @@ const app = express();
 app.use(
 	cors({
 		origin: process.env.FRONTEND_URL!,
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
 		credentials: true,
 	}),

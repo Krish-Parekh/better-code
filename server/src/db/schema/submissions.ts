@@ -7,8 +7,7 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 import { problems } from "./problems";
-import { users } from "./users";
-
+import { user } from "./auth";
 export const languages = pgEnum("language", ["cpp", "python", "java"]);
 export const submissionStatus = pgEnum("submission_status", [
 	"PENDING",
@@ -18,7 +17,7 @@ export const submissionStatus = pgEnum("submission_status", [
 
 export const submissions = pgTable("submissions", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+	userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
 	problemId: uuid("problem_id").references(() => problems.id, {
 		onDelete: "cascade",
 	}),

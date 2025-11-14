@@ -1,1 +1,0 @@
-ALTER TABLE "test_cases" ADD COLUMN "body_mdx" text NOT NULL;
