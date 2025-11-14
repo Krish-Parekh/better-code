@@ -20,15 +20,25 @@ export const auth = betterAuth({
 		enabled: true,
 		requireEmailVerification: true,
 		sendResetPassword: async ({ user, url }) => {
-			await emailService.sendResetPasswordEmail(user.email, url);
+			await emailService.sendResetPasswordEmail(
+				user.email,
+				url,
+				user.name,
+			);
 		},
 		onPasswordReset: async (data) => {
-			await emailService.sendPasswordResetSuccessEmail(data.user.email!);
+			await emailService.sendPasswordResetSuccessEmail(
+				data.user.email!,
+				data.user.name,
+			);
 		},
 	},
 	emailVerification: {
 		sendVerificationEmail: async ({ user, url }) => {
-			await emailService.sendVerificationEmail(user.email, url);
+			await emailService.sendVerificationEmail(user.email, url, user.name);
 		},
 	},
+	advanced: {
+		disableOriginCheck: true,
+	}
 });
