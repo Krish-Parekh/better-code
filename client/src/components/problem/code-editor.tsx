@@ -21,7 +21,10 @@ interface CodeEditorProps {
   onCodeChange: (code: string) => void;
 }
 
-export default function CodeEditor({ initialCode, onCodeChange }: CodeEditorProps) {
+export default function CodeEditor({
+  initialCode,
+  onCodeChange,
+}: CodeEditorProps) {
   const [code, setCode] = useState<string>(initialCode);
   return (
     <Editor

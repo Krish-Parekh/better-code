@@ -23,38 +23,31 @@ import {
   FormMessage,
 } from "../ui/form";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { useServerMutation } from "@/hooks/useMutation";
-import { Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
-const loginSchema = z.object({
+
+const forgotPasswordSchema = z.object({
   email: z
     .email("Please enter a valid email address")
     .min(1, "Email is required")
     .max(255, "Email must be at most 255 characters"),
-  password: z
-    .string()
-    .min(1, "Password is required")
-    .max(255, "Password must be at most 255 characters"),
 });
 
-type TLoginSchema = z.infer<typeof loginSchema>;
-export default function LoginForm() {
-  const form = useForm<TLoginSchema>({
-    resolver: zodResolver(loginSchema),
+type TForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;
+
+export default function ForgotPasswordForm() {
+  const form = useForm<TForgotPasswordSchema>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
     mode: "onChange",
   });
 
-  const onSubmit = async (data: TLoginSchema) => {
+  const onSubmit = async (data: TForgotPasswordSchema) => {
     try {
-      const response = await authClient.signIn.email({
+      const response = await authClient.forgetPassword({
         email: data.email,
-        password: data.password,
-        callbackURL: "/problems",
+        redirectTo: "/reset-password",
       });
 
       if (response.error) {
@@ -62,20 +55,22 @@ export default function LoginForm() {
       }
 
       if (response.data) {
-        toast.success("Logged in successfully");
+        toast.success("Reset link sent successfully");
       }
     } catch (error) {
-      toast.error("Failed to login");
+      toast.error("Failed to send reset link");
     }
   };
+
   return (
     <div className="flex items-center justify-center w-full">
       <div className="flex flex-1 flex-col justify-center px-4 py-10 lg:px-6">
         <Card className="mt-4 sm:mx-auto sm:w-full sm:max-w-md">
           <CardHeader>
-            <CardTitle className="text-lg">Sign in to Your Account</CardTitle>
+            <CardTitle className="text-lg">Reset Your Password</CardTitle>
             <CardDescription>
-              Continue solving coding challenges and track your progress.
+              Enter your email address and we'll send you a link to reset your
+              password.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -99,32 +94,6 @@ export default function LoginForm() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center justify-between">
-                        <FormLabel>Password</FormLabel>
-                        <Link
-                          href="/forgot-password"
-                          className="text-sm font-medium text-primary hover:text-primary/90 dark:text-primary hover:dark:text-primary/90 underline"
-                        >
-                          Forgot password?
-                        </Link>
-                      </div>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="Password"
-                          autoComplete="current-password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </Form>
             </form>
           </CardContent>
@@ -133,18 +102,18 @@ export default function LoginForm() {
               className="w-full py-2 font-medium cursor-pointer"
               onClick={form.handleSubmit(onSubmit)}
             >
-              Login
+              Send Reset Link
             </Button>
           </CardFooter>
         </Card>
 
         <p className="mt-4 text-center text-sm text-muted-foreground dark:text-muted-foreground">
-          Don't have an account?{" "}
+          Remember your password?{" "}
           <Link
-            href="/register"
+            href="/login"
             className="font-medium text-primary hover:text-primary/90 dark:text-primary hover:dark:text-primary/90 underline"
           >
-            Register
+            Sign in
           </Link>
         </p>
       </div>

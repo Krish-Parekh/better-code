@@ -25,6 +25,7 @@ import { useServerMutation } from "@/hooks/useMutation";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 const registerSchema = z.object({
   username: z
@@ -52,19 +53,9 @@ const registerSchema = z.object({
 
 type TRegisterSchema = z.infer<typeof registerSchema>;
 
-const KEY = "/auth/register";
-
 export default function RegisterForm() {
   const router = useRouter();
-  const { trigger, isMutating } = useServerMutation<TRegisterSchema, unknown>(
-    KEY,
-    {
-      onSuccess: () => {
-        toast.success("Account created successfully");
-        router.push("/login");
-      },
-    },
-  );
+
   const form = useForm<TRegisterSchema>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -76,7 +67,25 @@ export default function RegisterForm() {
   });
 
   const onSubmit = async (data: TRegisterSchema) => {
-    await trigger(data);
+    // Add the register for better auth here
+    try {
+      const response = await authClient.signUp.email({
+        email: data.email,
+        password: data.password,
+        name: data.username,
+        callbackURL: "/verify-email",
+      });
+
+      if (response.error) {
+        toast.error(response.error.message);
+      }
+
+      if (response.data) {
+        toast.success("Account created successfully");
+      }
+    } catch (error) {
+      toast.error("Failed to register");
+    }
   };
 
   return (
@@ -157,14 +166,9 @@ export default function RegisterForm() {
             <Button
               onClick={form.handleSubmit(onSubmit)}
               type="submit"
-              disabled={isMutating}
               className="w-full py-2 font-medium cursor-pointer"
             >
-              {isMutating ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                "Create account"
-              )}
+              Create account
             </Button>
           </CardFooter>
         </Card>

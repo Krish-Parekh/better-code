@@ -23,7 +23,7 @@ export interface EventSourceState {
 
 export function useEventSource(
   url: string | null,
-  options: EventSourceOptions = {}
+  options: EventSourceOptions = {},
 ) {
   const {
     onMessage,
@@ -131,4 +131,3 @@ export function useEventSource(
     isClosed: state.readyState === CLOSED,
   };
 }
-

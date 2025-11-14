@@ -61,11 +61,17 @@ export default function ProblemPage() {
   const [mdxSource, setMdxSource] = useState<MDXRemoteSerializeResult | null>(
     null,
   );
-  const [submissionStatusUrl, setSubmissionStatusUrl] = useState<string | null>(null);
-  const [submissionResult, setSubmissionResult] = useState<SubmissionResult | null>(null);
+  const [submissionStatusUrl, setSubmissionStatusUrl] = useState<string | null>(
+    null,
+  );
+  const [submissionResult, setSubmissionResult] =
+    useState<SubmissionResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { trigger } = useServerMutation<{ problemId: string, language: string, code: string }, { data: { jobId: string, statusURL: string } }>(`/submissions`, {
+
+  const { trigger } = useServerMutation<
+    { problemId: string; language: string; code: string },
+    { data: { jobId: string; statusURL: string } }
+  >(`/submissions`, {
     onSuccess: (data) => {
       console.log("Submission created:", data?.data);
       // Set the status URL to start listening for updates
@@ -80,23 +86,24 @@ export default function ProblemPage() {
   });
 
   // Set up EventSource to listen for submission updates
-  const { data: eventData, error: eventError, close } = useEventSource(
-    submissionStatusUrl,
-    {
-      onError: (event) => {
-        console.error("EventSource error:", event);
-        setIsSubmitting(false);
-      },
-      enabled: !!submissionStatusUrl,
-    }
-  );
+  const {
+    data: eventData,
+    error: eventError,
+    close,
+  } = useEventSource(submissionStatusUrl, {
+    onError: (event) => {
+      console.error("EventSource error:", event);
+      setIsSubmitting(false);
+    },
+    enabled: !!submissionStatusUrl,
+  });
 
   // Update submission result when eventData changes
   useEffect(() => {
     if (eventData) {
       console.log("EventSource message:", eventData);
       setSubmissionResult(eventData);
-      
+
       // Close connection if submission is completed or failed
       if (eventData.type === "completed" || eventData.type === "failed") {
         setIsSubmitting(false);
@@ -106,7 +113,9 @@ export default function ProblemPage() {
     }
   }, [eventData, close]);
 
-  const [code, setCode] = useState<string>(problem?.data?.metadata?.templates?.python || "");
+  const [code, setCode] = useState<string>(
+    problem?.data?.metadata?.templates?.python || "",
+  );
 
   useEffect(() => {
     const fetchMdxSource = async () => {
@@ -127,7 +136,7 @@ export default function ProblemPage() {
     // Reset previous submission state
     setSubmissionResult(null);
     setIsSubmitting(true);
-    
+
     try {
       await trigger({
         problemId: id as string,
@@ -138,7 +147,7 @@ export default function ProblemPage() {
       console.error(error);
       setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="h-screen max-h-screen overflow-hidden">
@@ -151,7 +160,7 @@ export default function ProblemPage() {
             <Button variant="outline" size="icon" disabled>
               <PlayIcon className="size-4" />
             </Button>
-            <Button 
+            <Button
               className="bg-green-500 text-white hover:bg-green-600/90 disabled:opacity-50"
               onClick={handleSubmit}
               disabled={isSubmitting}
