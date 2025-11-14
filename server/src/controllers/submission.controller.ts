@@ -106,10 +106,6 @@ export const getSubmissionStatus = async (
 
 		// Handle client disconnect
 		request.on("close", cleanup);
-
-		return response
-			.status(StatusCodes.OK)
-			.json({ message: "Submission status fetched successfully" });
 	} catch (error) {
 		next(error);
 	}

@@ -18,9 +18,10 @@ if __name__ == "__main__":
 
 interface CodeEditorProps {
   initialCode: string;
+  onCodeChange: (code: string) => void;
 }
 
-export default function CodeEditor({ initialCode }: CodeEditorProps) {
+export default function CodeEditor({ initialCode, onCodeChange }: CodeEditorProps) {
   const [code, setCode] = useState<string>(initialCode);
   return (
     <Editor
@@ -33,7 +34,10 @@ export default function CodeEditor({ initialCode }: CodeEditorProps) {
       theme="vs-dark"
       language={"python"}
       value={code}
-      onChange={(value) => setCode(value || "")}
+      onChange={(value) => {
+        setCode(value || "");
+        onCodeChange(value || "");
+      }}
     />
   );
 }
