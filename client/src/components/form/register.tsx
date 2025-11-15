@@ -21,11 +21,11 @@ import {
   FormControl,
   FormMessage,
 } from "../ui/form";
-import { useServerMutation } from "@/hooks/useMutation";
-import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { Loader2 } from "lucide-react";
 
 const registerSchema = z.object({
   username: z
@@ -54,8 +54,8 @@ const registerSchema = z.object({
 type TRegisterSchema = z.infer<typeof registerSchema>;
 
 export default function RegisterForm() {
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
   const form = useForm<TRegisterSchema>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -67,13 +67,13 @@ export default function RegisterForm() {
   });
 
   const onSubmit = async (data: TRegisterSchema) => {
-    // Add the register for better auth here
     try {
+      setIsLoading(true);
       const response = await authClient.signUp.email({
         email: data.email,
         password: data.password,
         name: data.username,
-        callbackURL: "/verify-email",
+        callbackURL: "/login",
       });
 
       if (response.error) {
@@ -81,10 +81,16 @@ export default function RegisterForm() {
       }
 
       if (response.data) {
-        toast.success("Account created successfully");
+        toast.success("Account created successfully!", {
+          description: "Please check your email for verification",
+        });
+        form.reset();
+        router.push("/login");
       }
     } catch (error) {
-      toast.error("Failed to register");
+      toast.error("Failed to register, Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -167,8 +173,10 @@ export default function RegisterForm() {
               onClick={form.handleSubmit(onSubmit)}
               type="submit"
               className="w-full py-2 font-medium cursor-pointer"
+              disabled={isLoading}
             >
-              Create account
+              {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isLoading ? "Creating account..." : "Create account"}
             </Button>
           </CardFooter>
         </Card>
