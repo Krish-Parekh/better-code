@@ -13,10 +13,10 @@ import { CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
+type TVerifyEmailStatus = "verifying" | "success" | "error";
+
 export default function VerifyEmailForm() {
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading",
-  );
+  const [status, setStatus] = useState<TVerifyEmailStatus>("verifying");
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const callbackURL = searchParams.get("callbackURL");
@@ -63,7 +63,7 @@ export default function VerifyEmailForm() {
               {status === "error" && (
                 <AlertCircle className="w-12 h-12 text-red-600 dark:text-red-500" />
               )}
-              {status === "loading" && (
+              {status === "verifying" && (
                 <Loader2 className="w-12 h-12 text-primary animate-spin" />
               )}
             </div>

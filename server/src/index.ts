@@ -31,7 +31,6 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(cookieParser());
 app.use(express.json());
-
 app.use(errorMiddleware);
 
 app.listen(process.env.PORT, () => {

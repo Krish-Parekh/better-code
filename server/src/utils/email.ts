@@ -16,29 +16,24 @@ export class EmailService {
 		data: Record<string, string | number>,
 	): Promise<string> {
 		return new Promise((resolve, reject) => {
-			ejs.renderFile(
-				join(this.viewsPath, templateName),
-				data,
-				(err, html) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(html);
-					}
-				},
-			);
+			ejs.renderFile(join(this.viewsPath, templateName), data, (err, html) => {
+				if (err) {
+					reject(err);
+				} else {
+					resolve(html);
+				}
+			});
 		});
 	}
 
-	async sendVerificationEmail(
-		email: string,
-		url: string,
-		username?: string,
-	) {
+	async sendVerificationEmail(email: string, url: string, username?: string) {
+		const token = url.split("token=")[1]?.split("&")[0];
+		const callbackURL = url.split("callbackURL=")[1];
+		const verificationLink = `${process.env.BETTER_AUTH_URL!}/verify-email?token=${token}&callbackURL=${callbackURL}`;
 		const html = await this.renderTemplate("verification-email.ejs", {
 			username: username || "there",
 			email,
-			verificationLink: url,
+			verificationLink,
 			currentYear: new Date().getFullYear(),
 		});
 
@@ -47,15 +42,11 @@ export class EmailService {
 			to: email,
 			subject: "Verify your email address - better code",
 			html,
-			text: `Hello ${username || "there"}, please verify your email by clicking this link: ${url}`,
+			text: `Hello ${username || "there"}, please verify your email by clicking this link: ${verificationLink}`,
 		});
 	}
 
-	async sendResetPasswordEmail(
-		email: string,
-		url: string,
-		username?: string,
-	) {
+	async sendResetPasswordEmail(email: string, url: string, username?: string) {
 		const html = await this.renderTemplate("reset-password-email.ejs", {
 			username: username || "there",
 			email,
@@ -72,10 +63,7 @@ export class EmailService {
 		});
 	}
 
-	async sendPasswordResetSuccessEmail(
-		email: string,
-		username?: string,
-	) {
+	async sendPasswordResetSuccessEmail(email: string, username?: string) {
 		const html = await this.renderTemplate("success-reset-password-email.ejs", {
 			username: username || "there",
 			email,

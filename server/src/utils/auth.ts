@@ -20,11 +20,7 @@ export const auth = betterAuth({
 		enabled: true,
 		requireEmailVerification: true,
 		sendResetPassword: async ({ user, url }) => {
-			await emailService.sendResetPasswordEmail(
-				user.email,
-				url,
-				user.name,
-			);
+			await emailService.sendResetPasswordEmail(user.email, url, user.name);
 		},
 		onPasswordReset: async (data) => {
 			await emailService.sendPasswordResetSuccessEmail(
@@ -39,6 +35,7 @@ export const auth = betterAuth({
 		},
 	},
 	advanced: {
-		disableOriginCheck: true,
-	}
+		disableOriginCheck: process.env.NODE_ENV === "dev" ? true : false,
+	},
+	trustedOrigins: [process.env.BETTER_AUTH_URL!],
 });

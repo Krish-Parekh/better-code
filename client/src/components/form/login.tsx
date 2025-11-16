@@ -24,6 +24,10 @@ import {
 } from "../ui/form";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+
 const loginSchema = z.object({
   email: z
     .email("Please enter a valid email address")
@@ -37,6 +41,8 @@ const loginSchema = z.object({
 
 type TLoginSchema = z.infer<typeof loginSchema>;
 export default function LoginForm() {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const form = useForm<TLoginSchema>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -48,6 +54,7 @@ export default function LoginForm() {
 
   const onSubmit = async (data: TLoginSchema) => {
     try {
+      setIsLoading(true);
       const response = await authClient.signIn.email({
         email: data.email,
         password: data.password,
@@ -60,9 +67,12 @@ export default function LoginForm() {
 
       if (response.data) {
         toast.success("Logged in successfully");
+        router.push("/problems");
       }
     } catch (error) {
-      toast.error("Failed to login");
+      toast.error("Failed to login, Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -129,8 +139,10 @@ export default function LoginForm() {
             <Button
               className="w-full py-2 font-medium cursor-pointer"
               onClick={form.handleSubmit(onSubmit)}
+              disabled={isLoading}
             >
-              Login
+              {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+              {isLoading ? "Logging in..." : "Login"}
             </Button>
           </CardFooter>
         </Card>
