@@ -6,6 +6,7 @@ import ejs from "ejs";
 import express from "express";
 import { join } from "path";
 import { errorMiddleware } from "./middlewares/error.middleware";
+import problemsRouter from "./routers/problems.routers";
 import { auth } from "./utils/auth";
 
 dotenv.config({
@@ -32,6 +33,8 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use(cookieParser());
 app.use(express.json());
 app.use(errorMiddleware);
+
+app.use("/api/problems", problemsRouter);
 
 app.listen(process.env.PORT, () => {
 	console.log(`Server is running on port ${process.env.PORT}`);

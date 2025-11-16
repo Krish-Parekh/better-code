@@ -34,7 +34,7 @@ const dummyCompanies = [
 	}, // fixed typos
 ];
 
-async function seedCompanies() {
+export async function seedCompanies() {
 	console.log("Seeding companies...");
 	await db
 		.insert(companies)

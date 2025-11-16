@@ -1,12 +1,9 @@
 import { Router } from "express";
-import {
-	getAllProblems,
-	getProblemById,
-} from "../controllers/problems.controller";
+import getProblems from "../controllers/problems.controller";
+import { authMiddleware } from "../middlewares/auth.middleware";
 
-const router = Router();
+const problemsRouter = Router();
 
-router.get("/", getAllProblems);
-router.get("/:id", getProblemById);
+problemsRouter.get("/", authMiddleware, getProblems);
 
-export default router;
+export default problemsRouter;

@@ -1,39 +1,30 @@
+import { fromNodeHeaders } from "better-auth/node";
+import type { User } from "better-auth/types";
 import type { NextFunction, Request, Response } from "express";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
-import jwt from "jsonwebtoken";
 import type { IResponse } from "../types/main";
+import { auth } from "../utils/auth";
 
-interface DecodedToken {
-	id: string;
-}
-export function authMiddleware(
+export async function authMiddleware(
 	request: Request,
 	response: Response,
 	next: NextFunction,
 ) {
 	try {
-		const accessToken = request.cookies.accessToken;
-		if (!accessToken) {
+		const session = await auth.api.getSession({
+			headers: fromNodeHeaders(request.headers),
+		});
+		if (!session) {
 			const payload: IResponse<unknown> = {
 				status: StatusCodes.UNAUTHORIZED,
 				message: ReasonPhrases.UNAUTHORIZED,
 			};
-			return response.status(StatusCodes.UNAUTHORIZED).json(payload);
+			return response.status(StatusCodes.UNAUTHORIZED).json(payload).end();
 		}
-		const decoded = jwt.verify(
-			accessToken,
-			process.env.ACCESS_TOKEN_SECRET!,
-		) as DecodedToken;
-		const userId = decoded.id;
-		if (!userId) {
-			return response.status(StatusCodes.UNAUTHORIZED).json({
-				status: StatusCodes.UNAUTHORIZED,
-				message: ReasonPhrases.UNAUTHORIZED,
-			});
-		}
-		request.userId = userId;
+		request.user = session?.user as User;
 		next();
 	} catch (error) {
+		console.error(error);
 		next(error);
 	}
 }

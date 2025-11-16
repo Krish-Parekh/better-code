@@ -84,7 +84,7 @@ const dummyTestCases: Record<
 	],
 };
 
-async function seedTestCases() {
+export async function seedTestCases() {
 	console.log("Seeding test cases...");
 	for (const [slug, cases] of Object.entries(dummyTestCases)) {
 		const [problem] = await db

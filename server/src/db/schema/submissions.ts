@@ -9,6 +9,7 @@ import {
 import { user } from "./auth";
 import { problems } from "./problems";
 export const languages = pgEnum("language", ["cpp", "python", "java"]);
+export type SubmissionStatus = (typeof submissionStatus.enumValues)[number];
 export const submissionStatus = pgEnum("submission_status", [
 	"PENDING",
 	"ACCEPTED",
