@@ -6,7 +6,8 @@ import { companies } from "../db/schema/companies";
 import { problemCompanies } from "../db/schema/problem_companies";
 import { problems } from "../db/schema/problems";
 import { submissions } from "../db/schema/submissions";
-import type { ICompany, IProblem, IResponse } from "../types/main";
+import { testCases } from "../db/schema/test_cases";
+import type { ICompany, IProblem, IResponse, IProblemById, ITestCase } from "../types/main";
 
 export default async function getProblems(
 	_request: Request,
@@ -35,6 +36,48 @@ export default async function getProblems(
 			status: StatusCodes.OK,
 			message: ReasonPhrases.OK,
 			data: result,
+		};
+		return response.status(StatusCodes.OK).json(payload).end();
+	} catch (error) {
+		next(error);
+	}
+}
+
+export async function getProblemById(
+	request: Request,
+	response: Response,
+	next: NextFunction,
+) {
+	try {
+		const { id } = request.params;
+		const result = await db
+			.select({
+				id: problems.id,
+				title: problems.title,
+				bodyMdx: problems.bodyMdx,
+				metadata: problems.metadata,
+				testCases: sql<ITestCase[]>`
+				COALESCE(
+					json_agg(
+					json_build_object(
+						'testCaseId', ${testCases.id},
+						'input', ${testCases.input},
+						'output', ${testCases.output}
+					)
+					) FILTER (WHERE ${testCases.id} IS NOT NULL),
+					'[]'::json
+				)
+				`
+			})
+			.from(problems)
+			.leftJoin(testCases, eq(problems.id, testCases.problemId))
+			.where(eq(problems.id, id as string))
+			.groupBy(problems.id, problems.title, problems.bodyMdx, problems.metadata);
+
+		const payload: IResponse<IProblemById> = {
+			status: StatusCodes.OK,
+			message: ReasonPhrases.OK,
+			data: result[0],
 		};
 		return response.status(StatusCodes.OK).json(payload).end();
 	} catch (error) {

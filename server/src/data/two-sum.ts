@@ -5,61 +5,64 @@ interface Templates {
 }
 
 export const twoSumTemplates: Templates = {
-	python: `# Python - Two Sum
-  class Solution:
-      def solve(self, nums, target):
-          # TODO: implement
-          # return [i, j]
-          pass
-  
-  if __name__ == "__main__":
-      import sys
-      data = sys.stdin.read().strip().split()
-      it = iter(data)
-      n = int(next(it))
-      nums = [int(next(it)) for _ in range(n)]
-      target = int(next(it))
-      ans = Solution().solve(nums, target)
-      print(ans)
+	python: `
+# Python - Two Sum
+class Solution:
+    def solve(self, nums, target):
+        # TODO: implement
+        # return [i, j]
+        pass
+
+if __name__ == "__main__":
+    import sys
+    data = sys.stdin.read().strip().split()
+    it = iter(data)
+    n = int(next(it))
+    nums = [int(next(it)) for _ in range(n)]
+    target = int(next(it))
+    ans = Solution().solve(nums, target)
+    print(ans)
   `,
-	javascript: `// JavaScript (Node) - Two Sum
-  class Solution {
-    solve(nums, target) {
-      // TODO: implement
-      // return [i, j]
-      return null;
+	javascript: `
+// JavaScript (Node) - Two Sum
+class Solution {
+  solve(nums, target) {
+    // TODO: implement
+    // return [i, j]
+    return null;
+  }
+}
+
+(function () {
+  const fs = require("fs");
+  const lines = fs.readFileSync(0, "utf8").trim().split("\\n");
+  const n = Number(lines[0]);
+  const nums = lines[1].trim().split(" ").map(Number);
+  const target = Number(lines[2]);
+  const res = new Solution().solve(nums, target);
+  console.log(Array.isArray(res) ? \`[\${res[0]},\${res[1]}]\` : res);
+})();
+  `,
+	java: `
+// Java - Two Sum
+import java.util.*;
+public class Solution {
+    public int[] solve(int[] nums, int target) {
+        // TODO: implement
+        // return new int[]{i, j};
+        return null;
     }
-  }
-  
-  (function () {
-    const fs = require("fs");
-    const lines = fs.readFileSync(0, "utf8").trim().split("\\n");
-    const n = Number(lines[0]);
-    const nums = lines[1].trim().split(" ").map(Number);
-    const target = Number(lines[2]);
-    const res = new Solution().solve(nums, target);
-    console.log(Array.isArray(res) ? \`[\${res[0]},\${res[1]}]\` : res);
-  })();
-  `,
-	java: `// Java - Two Sum
-  import java.util.*;
-  public class Solution {
-      public int[] solve(int[] nums, int target) {
-          // TODO: implement
-          // return new int[]{i, j};
-          return null;
-      }
-      public static void main(String[] args){
-          Scanner sc = new Scanner(System.in);
-          int n = Integer.parseInt(sc.nextLine().trim());
-          int[] nums = Arrays.stream(sc.nextLine().trim().split(" ")).mapToInt(Integer::parseInt).toArray();
-          int target = Integer.parseInt(sc.nextLine().trim());
-          int[] ans = new Solution().solve(nums, target);
-          if (ans == null) System.out.println("null");
-          else System.out.println("[" + ans[0] + "," + ans[1] + "]");
-          sc.close();
-      }
-  }
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        int n = Integer.parseInt(sc.nextLine().trim());
+        int[] nums = Arrays.stream(sc.nextLine().trim().split(" ")).mapToInt(Integer::parseInt).toArray();
+        int target = Integer.parseInt(sc.nextLine().trim());
+        int[] ans = new Solution().solve(nums, target);
+        if (ans == null) System.out.println("null");
+        else System.out.println("[" + ans[0] + "," + ans[1] + "]");
+        sc.close();
+    }
+}
   `,
 };
 

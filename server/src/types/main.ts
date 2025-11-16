@@ -18,6 +18,22 @@ export interface IProblem {
 	companies: ICompany[];
 }
 
+export interface ITestCase {
+	id: string;
+	stdin: string;
+	stdout: string;
+	input: string;
+	output: string;
+	bodyMdx: string;
+}
+export interface IProblemById {
+	id: string;
+	title: string;
+	bodyMdx: string;
+	metadata: unknown;
+	testCases: ITestCase[];
+
+}
 declare module "express-serve-static-core" {
 	interface Request {
 		user?: User;

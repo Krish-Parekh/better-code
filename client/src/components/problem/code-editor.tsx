@@ -1,46 +1,35 @@
-"use client";
-import { useState } from "react";
 import Editor from "@monaco-editor/react";
-
-const pythonCode = `def twoSum(nums, target):
-    # Write your solution here
-    pass
-
-# DO NOT MODIFY BELOW THIS LINE
-if __name__ == "__main__":
-    import sys
-    nums = list(map(int, sys.stdin.readline().strip().split()))
-    target = int(sys.stdin.readline().strip())
-    result = twoSum(nums, target)
-    if result:
-        print(' '.join(map(str, result)))
-`;
+import { useEffect, useState } from "react";
 
 interface CodeEditorProps {
-  initialCode: string;
-  onCodeChange: (code: string) => void;
+  templates: {
+    python: string
+    javascript: string
+    java: string
+  }
 }
 
-export default function CodeEditor({
-  initialCode,
-  onCodeChange,
-}: CodeEditorProps) {
-  const [code, setCode] = useState<string>(initialCode);
+export default function CodeEditor({ templates }: CodeEditorProps) {
+  const [code, setCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCode(templates.python);
+  }, [templates]);
+
   return (
-    <Editor
-      options={{
-        fontSize: 14,
-        padding: { top: 16, bottom: 16 },
-      }}
-      height="100%"
-      width="100%"
-      theme="vs-dark"
-      language={"python"}
-      value={code}
-      onChange={(value) => {
-        setCode(value || "");
-        onCodeChange(value || "");
-      }}
-    />
-  );
+    <div className="h-full w-full flex flex-col gap-2">
+      <Editor
+        options={{
+          fontSize: 14,
+          padding: { top: 16, bottom: 16 },
+        }}
+        height="100%"
+        width="100%"
+        theme="vs-dark"
+        language={code ? code.split("\n")[0].split(" ")[1].toLowerCase() : "python"}
+        value={code || undefined}
+        onChange={(value) => setCode(value || "")}
+      />
+    </div>
+  )
 }
