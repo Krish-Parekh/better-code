@@ -42,6 +42,22 @@ export default function Navbar() {
           </div>
         </div>
       )}
+
+      {!isAuthenticated && (
+        <div className="flex h-full">
+          <Link href="/login">
+            <div className="flex p-4 border-s-2 border-dashed border-gray-200 h-full items-center justify-center gap-4 min-w-32">
+              <h2 className="text-lg font-bold text-center">Login</h2>
+            </div>
+          </Link>
+          <Link href="/register">
+            <div className="flex p-4 border-s-2 border-dashed border-gray-200 h-full items-center justify-center gap-4 min-w-32">
+              <h2 className="text-lg font-bold text-center">Register</h2>
+            </div>
+          </Link>
+        </div>
+      )}
+
     </nav>
   );
 
