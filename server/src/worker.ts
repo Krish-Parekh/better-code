@@ -4,7 +4,7 @@ import fs from "fs-extra";
 import { v4 as uuidv4 } from "uuid";
 
 interface IRunSubmission {
-	language: "python" | "java" | "javascript";
+	language: "python" | "javascript";
 	code: string;
 }
 
@@ -15,14 +15,13 @@ interface ITestCase {
 
 const imageLookup: Record<IRunSubmission["language"], string> = {
 	python: "python:3.13-alpine",
-	java: "openjdk:17-jdk-slim",
+	
 	javascript: "node:23-alpine",
 };
 
 
 const runCommandLookup: Record<IRunSubmission["language"], string> = {
 	python: "python3 -u /app/solution.py < /app/input.txt",
-	java: "java -cp /app/solution.jar Solution < /app/input.txt",
 	javascript: "node /app/solution.js < /app/input.txt",
 };
 
@@ -45,9 +44,6 @@ async function runSubmission({ language, code }: IRunSubmission) {
 	switch (language) {
 		case "python":
 			await fs.writeFile(path.join(workDir, "solution.py"), code);
-			break;
-		case "java":
-			await fs.writeFile(path.join(workDir, "Solution.java"), code);
 			break;
 		case "javascript":
 			await fs.writeFile(path.join(workDir, "solution.js"), code);
