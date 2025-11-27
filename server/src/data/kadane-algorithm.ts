@@ -1,7 +1,6 @@
 interface Templates {
 	python: string;
 	javascript: string;
-	java: string;
 }
 
 export const maximumSubarrayTemplates: Templates = {
@@ -38,24 +37,6 @@ export const maximumSubarrayTemplates: Templates = {
     const res = new Solution().solve(nums);
     console.log(res);
   })();
-  `,
-	java: `// Java - Maximum Subarray (Kadane)
-  import java.util.*;
-  public class Solution {
-      public long solve(int[] nums) {
-          // TODO: implement Kadane's algorithm
-          // return max subarray sum (long/int)
-          return 0L;
-      }
-      public static void main(String[] args){
-          Scanner sc = new Scanner(System.in);
-          int n = Integer.parseInt(sc.nextLine().trim());
-          int[] nums = Arrays.stream(sc.nextLine().trim().split(" ")).mapToInt(Integer::parseInt).toArray();
-          long ans = new Solution().solve(nums);
-          System.out.println(ans);
-          sc.close();
-      }
-  }
   `,
 };
 

@@ -1,7 +1,6 @@
 interface Templates {
 	python: string;
 	javascript: string;
-	java: string;
 }
 
 export const subarraySumTemplates: Templates = {
@@ -40,25 +39,6 @@ export const subarraySumTemplates: Templates = {
     const res = new Solution().solve(nums, k);
     console.log(res);
   })();
-  `,
-	java: `// Java - Subarray Sum Equals K
-  import java.util.*;
-  public class Solution {
-      public int solve(int[] nums, int k) {
-          // TODO: implement
-          // return count of subarrays with sum == k
-          return 0;
-      }
-      public static void main(String[] args){
-          Scanner sc = new Scanner(System.in);
-          int n = Integer.parseInt(sc.nextLine().trim());
-          int[] nums = Arrays.stream(sc.nextLine().trim().split(" ")).mapToInt(Integer::parseInt).toArray();
-          int k = Integer.parseInt(sc.nextLine().trim());
-          int ans = new Solution().solve(nums, k);
-          System.out.println(ans);
-          sc.close();
-      }
-  }
   `,
 };
 

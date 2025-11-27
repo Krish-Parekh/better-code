@@ -1,7 +1,6 @@
 interface Templates {
 	python: string;
 	javascript: string;
-	java: string;
 }
 
 export const twoSumTemplates: Templates = {
@@ -41,28 +40,7 @@ class Solution {
   const target = Number(lines[2]);
   const res = new Solution().solve(nums, target);
   console.log(Array.isArray(res) ? \`[\${res[0]},\${res[1]}]\` : res);
-})();
-  `,
-	java: `
-// Java - Two Sum
-import java.util.*;
-public class Solution {
-    public int[] solve(int[] nums, int target) {
-        // TODO: implement
-        // return new int[]{i, j};
-        return null;
-    }
-    public static void main(String[] args){
-        Scanner sc = new Scanner(System.in);
-        int n = Integer.parseInt(sc.nextLine().trim());
-        int[] nums = Arrays.stream(sc.nextLine().trim().split(" ")).mapToInt(Integer::parseInt).toArray();
-        int target = Integer.parseInt(sc.nextLine().trim());
-        int[] ans = new Solution().solve(nums, target);
-        if (ans == null) System.out.println("null");
-        else System.out.println("[" + ans[0] + "," + ans[1] + "]");
-        sc.close();
-    }
-}
+  })();
   `,
 };
 
