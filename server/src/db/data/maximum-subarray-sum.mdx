@@ -1,0 +1,47 @@
+  # Maximum Subarray (Kadane’s Algorithm)
+  
+  Given an integer array \`nums\`, find the **contiguous subarray** (containing at least one number) which has the **largest sum**, and return its sum.
+  
+  ---
+  
+  ## Input Format
+  - \`nums\`: an array of integers
+  
+  ### Example Input
+  \`\`\`
+  nums = [-2,1,-3,4,-1,2,1,-5,4]
+  \`\`\`
+  
+  ---
+  
+  ## Output Format
+  - A single integer representing the **maximum subarray sum**.
+  
+  ### Example Output
+  \`\`\`
+  6
+  \`\`\`
+  
+  ### Explanation
+  The subarray \`[4,-1,2,1]\` has the largest sum = \`6\`.
+  
+  ---
+  
+  ## Constraints
+  - \`1 <= nums.length <= 10^5\`  
+  - \`-10^4 <= nums[i] <= 10^4\`
+  
+  ---
+  
+  ## Follow-Ups
+  - Can you solve it in **O(n)** time using Kadane’s algorithm?  
+  - How would you return the **actual subarray** (start & end indices)?  
+  - Can you adapt it for **maximum product subarray** or **2D maximum submatrix**?
+  
+  ---
+  
+  ## Complexity
+  | Approach | Time | Space |
+  |-----------|------|--------|
+  | Brute Force | O(n²) | O(1) |
+  | Kadane’s (Optimal) | O(n) | O(1) |

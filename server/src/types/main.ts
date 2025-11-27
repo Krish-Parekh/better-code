@@ -39,3 +39,7 @@ declare module "express-serve-static-core" {
 		user?: User;
 	}
 }
+export interface ILanguage {
+	python: string;
+	javascript: string;
+}
