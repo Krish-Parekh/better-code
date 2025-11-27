@@ -1,190 +1,233 @@
 import path from "node:path";
+import { PassThrough } from "node:stream";
+import { type Job, Worker } from "bullmq";
 import Docker from "dockerode";
 import fs from "fs-extra";
 import { v4 as uuidv4 } from "uuid";
-
-interface IRunSubmission {
-	language: "python" | "javascript";
-	code: string;
-}
-
-interface ITestCase {
-	input: string;
-	expectedOutput: string;
-}
-
-const imageLookup: Record<IRunSubmission["language"], string> = {
-	python: "python:3.13-alpine",
-	
-	javascript: "node:23-alpine",
-};
-
-
-const runCommandLookup: Record<IRunSubmission["language"], string> = {
-	python: "python3 -u /app/solution.py < /app/input.txt",
-	javascript: "node /app/solution.js < /app/input.txt",
-};
-
+import db from "./db";
+import { testCases } from "./db/schema/test_cases";
 const docker = new Docker();
+import { eq } from "drizzle-orm";
+import type { ITestCase } from "./types/main";
 
-const testCases: ITestCase[] = [
-	{ input: "2 7 11 15\n9", expectedOutput: "0 1" },
-	{ input: "3 2 4\n6", expectedOutput: "1 2" },
-	{ input: "1 2 3 4 5\n7", expectedOutput: "2 4" },
-	{ input: "1 2 3 4 5\n10", expectedOutput: "" },
-];
+const SUPPORTED_LANGUAGES = {
+	python: "python:3.13-alpine",
+	javascript: "node:23-alpine",
+}
 
-async function runSubmission({ language, code }: IRunSubmission) {
+const LANGUAGE_EXEC_MAP = {
+	python: "python3 -u /app/solution.py < /app/input.txt",
+	javascript: "node /app/solution.js < /app/input.txt"
+}
+
+async function runSubmission(job: Job) {
 	const submissionId = uuidv4();
-	const workDir = path.resolve("temp", submissionId);
-
-	await fs.ensureDir(workDir);
-
-	// Write solution file
-	switch (language) {
-		case "python":
-			await fs.writeFile(path.join(workDir, "solution.py"), code);
-			break;
-		case "javascript":
-			await fs.writeFile(path.join(workDir, "solution.js"), code);
-			break;
-		default:
-			throw new Error(`Unsupported language: ${language}`);
-	}
-
-	const image = imageLookup[language];
-	let container: Docker.Container | null = null;
+	console.log(`[${submissionId}] Starting submission processing for job ${job.id}`);
 
 	try {
-		// Create container once
-		console.log("Creating container");
-		container = await docker.createContainer({
-			Image: image,
-			WorkingDir: "/app",
-			Cmd: ["sleep", "infinity"], // Keep container running
-			AttachStdout: true,
-			AttachStderr: true,
-			HostConfig: {
-				Binds: [`${workDir}:/app`],
-				Memory: 512 * 1024 * 1024, // 512MB limit
-				NetworkMode: "none", // Security: disable network
-			},
-		});
+		const { problemId, language, code } = job.data;
+		console.log(`[${submissionId}] Processing submission - Problem ID: ${problemId}, Language: ${language}`);
 
-		await container.start();
-		console.log("Container started");
+		// Get the test cases from the database.
+		console.log(`[${submissionId}] Fetching test cases from database for problem ${problemId}`);
+		const testCaseRows = await db.select().from(testCases).where(eq(testCases.problemId, problemId)) as ITestCase[];
+		console.log(`[${submissionId}] Found ${testCaseRows.length} test cases`);
 
-		// Run all test cases in the same container
-		for (const testCase of testCases) {
-			const { input, expectedOutput } = testCase;
+		// Create a temporary working directory for the submission
+		const workDir = path.resolve("temp", submissionId);
+		console.log(`[${submissionId}] Creating working directory: ${workDir}`);
+		await fs.ensureDir(workDir);
 
-			console.log(`\nTest case:`);
-			console.log("Input:", input);
-			console.log("Expected:", expectedOutput);
+		// Write the code to the temporary working directory
+		console.log(`[${submissionId}] Writing code to working directory`);
+		switch (language) {
+			case "python":
+				await fs.writeFile(path.join(workDir, "solution.py"), code);
+				console.log(`[${submissionId}] Python code written to solution.py`);
+				break;
+			case "javascript":
+				await fs.writeFile(path.join(workDir, "solution.js"), code);
+				console.log(`[${submissionId}] JavaScript code written to solution.js`);
+				break;
+			default:
+				console.error(`[${submissionId}] Unsupported language: ${language}`);
+				throw new Error(`Unsupported language: ${language}`);
+		}
 
-			// Write input file
-			await fs.writeFile(path.join(workDir, "input.txt"), input);
+		// Get the image for the language.
+		const image = SUPPORTED_LANGUAGES[language as keyof typeof SUPPORTED_LANGUAGES];
 
-			// Execute command in running container
-			const exec = await container.exec({
-				Cmd: ["sh", "-c", runCommandLookup[language]],
+		if (!image) {
+			console.error(`[${submissionId}] No Docker image found for language: ${language}`);
+			throw new Error(`Unsupported language: ${language}`);
+		}
+
+		console.log(`[${submissionId}] Using Docker image: ${image}`);
+
+		// Create a container for the submission.
+		let container: Docker.Container | null = null;
+		try {
+			console.log(`[${submissionId}] Creating Docker container`);
+			container = await docker.createContainer({
+				Image: image,
+				WorkingDir: "/app",
+				Cmd: ["sleep", "infinity"], // Keep container running
 				AttachStdout: true,
 				AttachStderr: true,
+				HostConfig: {
+					Binds: [`${workDir}:/app`],
+					Memory: 512 * 1024 * 1024, // 512MB limit
+					NetworkMode: "none", // Security: disable network
+				},
 			});
 
-			const stream = await exec.start({ Detach: false });
+			console.log(`[${submissionId}] Starting Docker container`);
+			await container.start();
 
-			// Collect output
-			let output = "";
-			stream.on("data", (chunk: Buffer) => {
-				output += chunk.toString("utf-8");
-			});
+			// Run the test cases.
+			console.log(`[${submissionId}] Running ${testCaseRows.length} test cases`);
+			for (let i = 0; i < testCaseRows.length; i++) {
+				const testCase = testCaseRows[i];
+				if (!testCase) {
+					throw new Error(`Test case ${i + 1} is undefined`);
+				}
+				const { stdin, stdout } = testCase;
+				console.log(`[${submissionId}] Running test case ${i + 1}/${testCaseRows.length}`);
 
-			await new Promise((resolve) => stream.on("end", resolve));
+				const exec = await container.exec({
+					Cmd: ["sh", "-c", LANGUAGE_EXEC_MAP[language as keyof typeof LANGUAGE_EXEC_MAP]],
+					AttachStdout: true,
+					AttachStderr: true,
+				});
 
-			// Clean output (remove Docker stream headers)
-			const cleanOutput = output
-				.replace(/[\x00-\x08]/g, "")
-				.trim();
+				// Write an input file to the container.
+				console.log(`[${submissionId}] Writing input for test case ${i + 1}`);
+				await fs.writeFile(path.join(workDir, "input.txt"), stdin);
 
-			console.log("Output:", cleanOutput);
-			console.log("Match:", cleanOutput === expectedOutput ? "✓" : "✗");
-		}
-	} finally {
-		// Cleanup
-		if (container) {
-			try {
-				await container.stop({ t: 1 });
-				await container.remove();
-				console.log("\nContainer cleaned up");
-			} catch (err) {
-				console.error("Cleanup error:", err);
+				// Start the execution.
+				console.log(`[${submissionId}] Executing test case ${i + 1}`);
+				const stream = await exec.start({ Detach: false, Tty: false });
+
+				let stdoutOutput = "";
+				let stderrOutput = "";
+				
+				// Use dockerode's modem to demultiplex stdout and stderr
+				const modem = (docker as any).modem;
+				if (modem && modem.demuxStream) {
+					// dockerode provides demuxStream utility
+					const stdoutStream = new PassThrough();
+					const stderrStream = new PassThrough();
+					
+					modem.demuxStream(stream, stdoutStream, stderrStream);
+					
+					stdoutStream.on("data", (chunk: Buffer) => {
+						stdoutOutput += chunk.toString("utf-8");
+					});
+					
+					stderrStream.on("data", (chunk: Buffer) => {
+						stderrOutput += chunk.toString("utf-8");
+					});
+					
+					await new Promise((resolve, reject) => {
+						stream.on("end", resolve);
+						stream.on("error", reject);
+					});
+				} else {
+					// Fallback: manual parsing of Docker multiplexed stream
+					stream.on("data", (chunk: Buffer) => {
+						if (chunk.length >= 8) {
+							// Docker multiplex format: [stream_type(1)][padding(3)][size(4)][data...]
+							const streamType = chunk[0];
+							const data = chunk.slice(8);
+							
+							if (streamType === 1) {
+								stdoutOutput += data.toString("utf-8");
+							} else if (streamType === 2) {
+								stderrOutput += data.toString("utf-8");
+							}
+						} else {
+							// Small chunk, likely just data
+							stdoutOutput += chunk.toString("utf-8");
+						}
+					});
+
+					await new Promise((resolve, reject) => {
+						stream.on("end", resolve);
+						stream.on("error", reject);
+					});
+				}
+
+				// Log stderr if present for debugging
+				if (stderrOutput.trim()) {
+					console.log(`[${submissionId}] Test case ${i + 1} stderr: ${stderrOutput.trim()}`);
+				}
+
+				const actualOutput = stdoutOutput.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+				const expectedOutput = stdout.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+				
+				// Debug: log actual bytes to see hidden characters
+				console.log(`[${submissionId}] Test case ${i + 1} - Expected (${expectedOutput.length} chars): "${expectedOutput}"`);
+				console.log(`[${submissionId}] Test case ${i + 1} - Got (${actualOutput.length} chars): "${actualOutput}"`);
+				console.log(`[${submissionId}] Test case ${i + 1} - Expected bytes: [${Array.from(Buffer.from(expectedOutput)).join(',')}]`);
+				console.log(`[${submissionId}] Test case ${i + 1} - Got bytes: [${Array.from(Buffer.from(actualOutput)).join(',')}]`);
+				
+				const isMatch = actualOutput === expectedOutput;
+				console.log(`[${submissionId}] Test case ${i + 1} result: ${isMatch ? 'PASS' : 'FAIL'}`);
+
+				if (!isMatch) {
+					console.error(`[${submissionId}] Test case ${i + 1} failed - Expected: "${expectedOutput}", Got: "${actualOutput}"`);
+					throw new Error(`Test case failed: ${stdin} -> ${actualOutput} !== ${expectedOutput}`);
+				}
+
+				// Clean the output file.
+				await fs.remove(path.join(workDir, "input.txt"));
+				await fs.remove(path.join(workDir, "output.txt"));
 			}
-		}
-		await fs.remove(workDir);
-	}
-}
-const submissionLookup: Record<string, string> = {
-	"python": `
-# Python - Two Sum
-class Solution:
-    def solve(self, nums, target):
-        num_map = {}
-        for i, num in enumerate(nums):
-            complement = target - num
-            if complement in num_map:
-                return [num_map[complement], i]
-            num_map[num] = i
-        return []
 
-if __name__ == "__main__":
-    import sys
-    input_text = sys.stdin.read()
-    
-    lines = [line.strip() for line in input_text.splitlines() if line.strip()]
-    
-    nums = [int(x) for x in lines[0].split()]
-    target = int(lines[1])
-    
-    ans = Solution().solve(nums, target)
-    print(" ".join(map(str, ans)))
-	`,
-	"javascript": `
-// JavaScript - Two Sum
-class Solution {
-	solve(nums, target) {
-		for (let i = 0; i < nums.length; i++) {
-			for (let j = i + 1; j < nums.length; j++) {
-				if (nums[i] + nums[j] === target) {
-					return [i, j];
+			console.log(`[${submissionId}] All test cases passed successfully`);
+
+			// Clean the working directory.
+			console.log(`[${submissionId}] Cleaning up working directory`);
+			await fs.remove(workDir);
+
+			console.log(`[${submissionId}] Submission completed successfully`);
+			return { success: true };
+		} catch (error) {
+			console.error(`[${submissionId}] Container execution failed:`, error);
+			throw new Error(`Failed to create container: ${error}`);
+		} finally {
+			console.log(`[${submissionId}] Cleanup: Removing working directory`);
+			await fs.remove(workDir);
+
+			if (container) {
+				console.log(`[${submissionId}] Cleanup: Stopping and removing container`);
+				try {
+					await container.stop();
+					await container.remove();
+				} catch (cleanupError) {
+					console.error(`[${submissionId}] Error during container cleanup:`, cleanupError);
 				}
 			}
 		}
-		return [];
+
+	} catch (error) {
+		console.error(`[${submissionId}] Submission processing failed:`, error);
+		throw new Error(`Failed to run submission: ${error}`);
 	}
 }
 
-const fs = require("fs");
-const input = fs.readFileSync(0, "utf8").trim();
-const lines = input.split("\\n");
-const nums = lines[0].trim().split(" ").map(Number);
-const target = Number(lines[1]);
-const ans = new Solution().solve(nums, target);
-console.log(ans.join(" "));
-	`,
-}
+const worker = new Worker("submissions", runSubmission, {
+	connection: {
+		host: "localhost",
+		port: 6379,
+		password: "redis123",
+	},
+});
 
+worker.on("completed", (job, result) => {
+	console.log(`Job ${job.id} completed successfully`, result);
+});
 
-async function main() {
-	for (const language in submissionLookup) {
-		console.log(language);
-		console.log(submissionLookup[language]);
-		console.log("--------------------------------");
-		await runSubmission({
-			language,
-			code: submissionLookup[language],
-		});
-	}
-}
-main();
-
+worker.on("failed", (job, error) => {
+	console.error(`Job ${job?.id} failed`, error);
+});
