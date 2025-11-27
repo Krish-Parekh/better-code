@@ -2,8 +2,6 @@ import { eq, sql } from "drizzle-orm";
 import type { NextFunction, Request, Response } from "express";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import db from "../db";
-import { companies } from "../db/schema/companies";
-import { problemCompanies } from "../db/schema/problem_companies";
 import { problems } from "../db/schema/problems";
 import { submissions } from "../db/schema/submissions";
 import { testCases } from "../db/schema/test_cases";
@@ -20,22 +18,35 @@ export default async function getProblems(
 				id: problems.id,
 				title: problems.title,
 				submissions: submissions.status,
-				companies: sql<ICompany[]>`COALESCE(
-				JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('name', ${companies.name}, 'logoUrl', ${companies.logoUrl}))
-				FILTER (WHERE ${companies.id} IS NOT NULL),
-				'[]'
-				)`,
+				companies: sql<ICompany[]>`
+					COALESCE(
+						(
+							SELECT JSON_AGG(
+								JSONB_BUILD_OBJECT('name', c.name, 'logoUrl', c.logo_url)
+								ORDER BY pc.frequency DESC
+							)
+							FROM problem_companies pc
+							INNER JOIN companies c ON c.id = pc.company_id
+							WHERE pc.problem_id = ${problems.id}
+						),
+						'[]'::json
+					)
+				`,
 			})
 			.from(problems)
-			.leftJoin(problemCompanies, eq(problemCompanies.problemId, problems.id))
-			.leftJoin(companies, eq(companies.id, problemCompanies.companyId))
 			.leftJoin(submissions, eq(submissions.problemId, problems.id))
 			.groupBy(problems.id, problems.title, submissions.status);
+
+		// Limit to top 3 companies for each problem
+		const processedResult = result.map(problem => ({
+			...problem,
+			companies: problem.companies.slice(0, 3)
+		}));
 
 		const payload: IResponse<IProblem[]> = {
 			status: StatusCodes.OK,
 			message: ReasonPhrases.OK,
-			data: result,
+			data: processedResult,
 		};
 		return response.status(StatusCodes.OK).json(payload).end();
 	} catch (error) {

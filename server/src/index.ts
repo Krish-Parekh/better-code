@@ -38,6 +38,8 @@ app.use(errorMiddleware);
 app.use("/api/problems", problemsRouter);
 app.use("/api/submissions", submissionsRouter);
 
+
+
 app.listen(process.env.PORT, () => {
 	console.log(`Server is running on port ${process.env.PORT}`);
 });
