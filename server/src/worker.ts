@@ -28,15 +28,37 @@ async function runSubmission(job: Job) {
 		const { problemId, language, code } = job.data;
 		console.log(`[${submissionId}] Processing submission - Problem ID: ${problemId}, Language: ${language}`);
 
+		// Emit progress: Starting
+		await job.updateProgress({
+			type: "status",
+			status: "PENDING",
+			message: "Starting submission processing...",
+		});
+
 		// Get the test cases from the database.
 		console.log(`[${submissionId}] Fetching test cases from database for problem ${problemId}`);
 		const testCaseRows = await db.select().from(testCases).where(eq(testCases.problemId, problemId)) as ITestCase[];
 		console.log(`[${submissionId}] Found ${testCaseRows.length} test cases`);
 
+		// Emit progress: Test cases found
+		await job.updateProgress({
+			type: "status",
+			status: "PROCESSING",
+			message: `Found ${testCaseRows.length} test cases`,
+			totalTestCases: testCaseRows.length,
+		});
+
 		// Create a temporary working directory for the submission
 		const workDir = path.resolve("temp", submissionId);
 		console.log(`[${submissionId}] Creating working directory: ${workDir}`);
 		await fs.ensureDir(workDir);
+
+		// Emit progress: Preparing code
+		await job.updateProgress({
+			type: "status",
+			status: "PROCESSING",
+			message: "Preparing code for execution...",
+		});
 
 		// Write the code to the temporary working directory
 		console.log(`[${submissionId}] Writing code to working directory`);
@@ -64,6 +86,13 @@ async function runSubmission(job: Job) {
 
 		console.log(`[${submissionId}] Using Docker image: ${image}`);
 
+		// Emit progress: Creating container
+		await job.updateProgress({
+			type: "status",
+			status: "PROCESSING",
+			message: "Creating Docker container...",
+		});
+
 		// Create a container for the submission.
 		let container: Docker.Container | null = null;
 		try {
@@ -84,6 +113,13 @@ async function runSubmission(job: Job) {
 			console.log(`[${submissionId}] Starting Docker container`);
 			await container.start();
 
+			// Emit progress: Container started
+			await job.updateProgress({
+				type: "status",
+				status: "PROCESSING",
+				message: "Container started, running test cases...",
+			});
+
 			// Run the test cases.
 			console.log(`[${submissionId}] Running ${testCaseRows.length} test cases`);
 			for (let i = 0; i < testCaseRows.length; i++) {
@@ -93,6 +129,15 @@ async function runSubmission(job: Job) {
 				}
 				const { stdin, stdout } = testCase;
 				console.log(`[${submissionId}] Running test case ${i + 1}/${testCaseRows.length}`);
+
+				// Emit progress: Running test case
+				await job.updateProgress({
+					type: "testCase",
+					status: "PROCESSING",
+					message: `Running test case ${i + 1}/${testCaseRows.length}...`,
+					currentTestCase: i + 1,
+					totalTestCases: testCaseRows.length,
+				});
 
 				const exec = await container.exec({
 					Cmd: ["sh", "-c", LANGUAGE_EXEC_MAP[language as keyof typeof LANGUAGE_EXEC_MAP]],
@@ -174,8 +219,29 @@ async function runSubmission(job: Job) {
 				const isMatch = actualOutput === expectedOutput;
 				console.log(`[${submissionId}] Test case ${i + 1} result: ${isMatch ? 'PASS' : 'FAIL'}`);
 
+				// Emit progress: Test case result
+				await job.updateProgress({
+					type: "testCase",
+					status: isMatch ? "PASSED" : "FAILED",
+					message: `Test case ${i + 1} ${isMatch ? 'passed' : 'failed'}`,
+					currentTestCase: i + 1,
+					totalTestCases: testCaseRows.length,
+					passed: isMatch,
+					expected: expectedOutput,
+					actual: actualOutput,
+				});
+
 				if (!isMatch) {
 					console.error(`[${submissionId}] Test case ${i + 1} failed - Expected: "${expectedOutput}", Got: "${actualOutput}"`);
+					
+					// Emit progress: Submission failed
+					await job.updateProgress({
+						type: "status",
+						status: "REJECTED",
+						message: `Test case ${i + 1} failed`,
+						error: `Expected: "${expectedOutput}", Got: "${actualOutput}"`,
+					});
+					
 					throw new Error(`Test case failed: ${stdin} -> ${actualOutput} !== ${expectedOutput}`);
 				}
 
@@ -186,14 +252,41 @@ async function runSubmission(job: Job) {
 
 			console.log(`[${submissionId}] All test cases passed successfully`);
 
+			// Emit progress: All tests passed
+			await job.updateProgress({
+				type: "status",
+				status: "ACCEPTED",
+				message: "All test cases passed!",
+				totalTestCases: testCaseRows.length,
+				passedTestCases: testCaseRows.length,
+			});
+
 			// Clean the working directory.
 			console.log(`[${submissionId}] Cleaning up working directory`);
 			await fs.remove(workDir);
 
 			console.log(`[${submissionId}] Submission completed successfully`);
-			return { success: true };
+			return { 
+				success: true,
+				status: "ACCEPTED",
+				message: "All test cases passed",
+				totalTestCases: testCaseRows.length,
+			};
 		} catch (error) {
 			console.error(`[${submissionId}] Container execution failed:`, error);
+			
+			// Emit progress: Error occurred
+			try {
+				await job.updateProgress({
+					type: "status",
+					status: "REJECTED",
+					message: "Execution failed",
+					error: error instanceof Error ? error.message : String(error),
+				});
+			} catch (progressError) {
+				console.error(`[${submissionId}] Failed to update progress:`, progressError);
+			}
+			
 			throw new Error(`Failed to create container: ${error}`);
 		} finally {
 			console.log(`[${submissionId}] Cleanup: Removing working directory`);
@@ -212,6 +305,19 @@ async function runSubmission(job: Job) {
 
 	} catch (error) {
 		console.error(`[${submissionId}] Submission processing failed:`, error);
+		
+		// Emit progress: Submission failed
+		try {
+			await job.updateProgress({
+				type: "status",
+				status: "REJECTED",
+				message: "Submission processing failed",
+				error: error instanceof Error ? error.message : String(error),
+			});
+		} catch (progressError) {
+			console.error(`[${submissionId}] Failed to update progress:`, progressError);
+		}
+		
 		throw new Error(`Failed to run submission: ${error}`);
 	}
 }

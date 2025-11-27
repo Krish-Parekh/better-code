@@ -60,23 +60,34 @@ export const getSubmissionStatus = async (
 		}
 
 		const state = await job.getState();
-		response.write(`data: ${JSON.stringify({ status: state })}\n\n`);
+		
+		// Send initial state
+		response.write(`data: ${JSON.stringify({ 
+			type: "status", 
+			status: state,
+			message: `Job is ${state}` 
+		})}\n\n`);
 
 		// Listen for progress updates
 		const progressListener = ({ jobId: eventJobId, data }: any) => {
 			if (eventJobId === jobId) {
-				response.write(
-					`data: ${JSON.stringify({ type: "progress", ...data })}\n\n`,
-				);
+				const progressData = typeof data === 'string' ? JSON.parse(data) : data;
+				response.write(`data: ${JSON.stringify({
+					type: progressData.type || "progress",
+					...progressData,
+				})}\n\n`);
 			}
 		};
 
 		// Listen for completion
 		const completedListener = ({ jobId: eventJobId, returnvalue }: any) => {
 			if (eventJobId === jobId) {
-				response.write(
-					`data: ${JSON.stringify({ type: "completed", results: returnvalue })}\n\n`,
-				);
+				response.write(`data: ${JSON.stringify({
+					type: "completed",
+					status: "ACCEPTED",
+					message: "All test cases passed",
+					result: returnvalue,
+				})}\n\n`);
 				cleanup();
 			}
 		};
@@ -84,9 +95,12 @@ export const getSubmissionStatus = async (
 		// Listen for failures
 		const failedListener = ({ jobId: eventJobId, failedReason }: any) => {
 			if (eventJobId === jobId) {
-				response.write(
-					`data: ${JSON.stringify({ type: "failed", error: failedReason })}\n\n`,
-				);
+				response.write(`data: ${JSON.stringify({
+					type: "failed",
+					status: "REJECTED",
+					message: "Submission failed",
+					error: failedReason,
+				})}\n\n`);
 				cleanup();
 			}
 		};
@@ -106,6 +120,7 @@ export const getSubmissionStatus = async (
 
 		// Handle client disconnect
 		request.on("close", cleanup);
+
 	} catch (error) {
 		next(error);
 	}

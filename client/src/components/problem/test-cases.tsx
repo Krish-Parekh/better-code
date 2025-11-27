@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
 interface TestCase {
   testCaseId: string;
@@ -10,11 +11,14 @@ interface TestCase {
   output: string;
 }
 
+export type TestCaseState = "pending" | "running" | "passed" | "failed";
+
 interface TestCasesProps {
   testCases?: TestCase[];
+  testCaseStates?: Record<number, TestCaseState>;
 }
 
-export default function TestCases({ testCases = [] }: TestCasesProps) {
+export default function TestCases({ testCases = [], testCaseStates = {} }: TestCasesProps) {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   if (!testCases || testCases.length === 0) {
@@ -30,20 +34,33 @@ export default function TestCases({ testCases = [] }: TestCasesProps) {
   return (
     <div className="h-full w-full flex flex-col">
       <div className="p-4 border-b flex gap-2 overflow-x-auto">
-        {testCases.map((testCase, index) => (
-          <button
-            key={testCase.testCaseId}
-            onClick={() => setSelectedIndex(index)}
-            className={cn(
-              "px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap",
-              selectedIndex === index
-                ? "bg-primary text-primary-foreground ring-2 ring-offset-2 ring-offset-background ring-ring"
-                : "bg-muted hover:bg-muted/80 text-foreground"
-            )}
-          >
-            Test Case {index + 1}
-          </button>
-        ))}
+        {testCases.map((testCase, index) => {
+          const state = testCaseStates[index] || "pending";
+          const isSelected = selectedIndex === index;
+          
+          return (
+            <button
+              key={testCase.testCaseId}
+              onClick={() => setSelectedIndex(index)}
+              className={cn(
+                "px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2",
+                isSelected && "ring-2 ring-offset-2 ring-offset-background ring-ring",
+                state === "passed" && isSelected && "bg-green-500 text-white",
+                state === "passed" && !isSelected && "bg-green-500/20 text-green-600 hover:bg-green-500/30",
+                state === "failed" && isSelected && "bg-red-500 text-white",
+                state === "failed" && !isSelected && "bg-red-500/20 text-red-600 hover:bg-red-500/30",
+                state === "running" && "bg-blue-500/20 text-blue-600",
+                state === "pending" && isSelected && "bg-primary text-primary-foreground",
+                state === "pending" && !isSelected && "bg-muted hover:bg-muted/80 text-foreground"
+              )}
+            >
+              {state === "passed" && <CheckCircle2 className="size-4" />}
+              {state === "failed" && <XCircle className="size-4" />}
+              {state === "running" && <Loader2 className="size-4 animate-spin" />}
+              Test Case {index + 1}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
