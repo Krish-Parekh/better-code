@@ -58,18 +58,20 @@ export default async function seedProblems() {
     try {
         console.log("Seeding problems...");
         for (const problem of data) {
-        try {
-            const result = await db.insert(problems).values(problem).onConflictDoUpdate({
-                target: [problems.title],
-                set: {
-                    updatedAt: sql`now()`,
-                },
-            });
-            console.log(`Seeded problem ${result.rowCount || 0}`);
-        } catch (error) {
-            console.error(`Error seeding problem ${problem.title}:`, error);
-            throw error;
-        }
+            try {
+                const result = await db.insert(problems).values(problem).onConflictDoUpdate({
+                    target: [problems.title],
+                    set: {
+                        bodyMdx: problem.bodyMdx,
+                        metadata: problem.metadata,
+                        updatedAt: sql`now()`,
+                    },
+                });
+                console.log(`Seeded problem ${result.rowCount || 0}`);
+            } catch (error) {
+                console.error(`Error seeding problem ${problem.title}:`, error);
+                throw error;
+            }
         }
     } catch (error) {
         console.error(`Error seeding problems:`, error);
