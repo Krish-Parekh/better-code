@@ -4,42 +4,42 @@ interface Templates {
 }
 
 export const subarraySumTemplates: Templates = {
-	python: `# Python - Subarray Sum Equals K
-  class Solution:
-      def solve(self, nums, k):
-          # TODO: implement
-          # return count of subarrays with sum == k
-          pass
-  
-  if __name__ == "__main__":
-      import sys
-      data = sys.stdin.read().strip().split()
-      it = iter(data)
-      n = int(next(it))
-      nums = [int(next(it)) for _ in range(n)]
-      k = int(next(it))
-      ans = Solution().solve(nums, k)
-      print(ans)
-  `,
-	javascript: `// JavaScript (Node) - Subarray Sum Equals K
-  class Solution {
-    solve(nums, k) {
-      // TODO: implement
-      // return count of subarrays with sum == k
-      return 0;
-    }
+	python: 
+`# Python - Subarray Sum Equals K
+class Solution:
+    def solve(self, nums, k):
+        # TODO: implement
+        # return count of subarrays with sum == k
+        pass
+
+if __name__ == "__main__":
+    import sys
+    data = sys.stdin.read().strip().split()
+    it = iter(data)
+    n = int(next(it))
+    nums = [int(next(it)) for _ in range(n)]
+    k = int(next(it))
+    ans = Solution().solve(nums, k)
+    print(ans)`,
+	javascript: 
+`// JavaScript (Node) - Subarray Sum Equals K
+class Solution {
+  solve(nums, k) {
+    // TODO: implement
+    // return count of subarrays with sum == k
+    return 0;
   }
-  
-  (function () {
-    const fs = require("fs");
-    const lines = fs.readFileSync(0, "utf8").trim().split("\\n");
-    const n = Number(lines[0]);
-    const nums = lines[1].trim().split(" ").map(Number);
-    const k = Number(lines[2]);
-    const res = new Solution().solve(nums, k);
-    console.log(res);
-  })();
-  `,
+}
+
+(function () {
+  const fs = require("fs");
+  const lines = fs.readFileSync(0, "utf8").trim().split("\\n");
+  const n = Number(lines[0]);
+  const nums = lines[1].trim().split(" ").map(Number);
+  const k = Number(lines[2]);
+  const res = new Solution().solve(nums, k);
+  console.log(res);
+})();`,
 };
 
 export const subarraySumMdx: string = `

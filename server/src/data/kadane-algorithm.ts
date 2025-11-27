@@ -1,43 +1,43 @@
 interface Templates {
-	python: string;
-	javascript: string;
+  python: string;
+  javascript: string;
 }
 
 export const maximumSubarrayTemplates: Templates = {
-	python: `# Python - Maximum Subarray (Kadane)
-  class Solution:
-      def solve(self, nums):
-          # TODO: implement Kadane's algorithm
-          # return max subarray sum (int)
-          pass
-  
-  if __name__ == "__main__":
-      import sys
-      data = sys.stdin.read().strip().split()
-      it = iter(data)
-      n = int(next(it))
-      nums = [int(next(it)) for _ in range(n)]
-      ans = Solution().solve(nums)
-      print(ans)
-  `,
-	javascript: `// JavaScript (Node) - Maximum Subarray (Kadane)
-  class Solution {
-    solve(nums) {
-      // TODO: implement Kadane's algorithm
-      // return max subarray sum (number)
-      return 0;
-    }
+  python:
+    `# Python - Maximum Subarray (Kadane)
+class Solution:
+    def solve(self, nums):
+        # TODO: implement Kadane's algorithm
+        # return max subarray sum (int)
+        pass
+
+if __name__ == "__main__":
+    import sys
+    data = sys.stdin.read().strip().split()
+    it = iter(data)
+    n = int(next(it))
+    nums = [int(next(it)) for _ in range(n)]
+    ans = Solution().solve(nums)
+    print(ans)`,
+  javascript:
+    `// JavaScript (Node) - Maximum Subarray (Kadane)
+class Solution {
+  solve(nums) {
+    // TODO: implement Kadane's algorithm
+    // return max subarray sum (number)
+    return 0;
   }
-  
-  (function () {
-    const fs = require("fs");
-    const lines = fs.readFileSync(0, "utf8").trim().split("\\n");
-    const n = Number(lines[0]);
-    const nums = lines[1].trim().split(" ").map(Number);
-    const res = new Solution().solve(nums);
-    console.log(res);
-  })();
-  `,
+}
+
+(function () {
+  const fs = require("fs");
+  const lines = fs.readFileSync(0, "utf8").trim().split("\\n");
+  const n = Number(lines[0]);
+  const nums = lines[1].trim().split(" ").map(Number);
+  const res = new Solution().solve(nums);
+  console.log(res);
+})();`,
 };
 
 export const maximumSubarrayMdx: string = `

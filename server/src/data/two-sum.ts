@@ -4,8 +4,8 @@ interface Templates {
 }
 
 export const twoSumTemplates: Templates = {
-	python: `
-# Python - Two Sum
+	python: 
+`# Python - Two Sum
 class Solution:
     def solve(self, nums, target):
         # TODO: implement
@@ -20,10 +20,9 @@ if __name__ == "__main__":
     nums = [int(next(it)) for _ in range(n)]
     target = int(next(it))
     ans = Solution().solve(nums, target)
-    print(ans)
-  `,
-	javascript: `
-// JavaScript (Node) - Two Sum
+    print(ans)`,
+	javascript: 
+`// JavaScript (Node) - Two Sum
 class Solution {
   solve(nums, target) {
     // TODO: implement
@@ -40,8 +39,7 @@ class Solution {
   const target = Number(lines[2]);
   const res = new Solution().solve(nums, target);
   console.log(Array.isArray(res) ? \`[\${res[0]},\${res[1]}]\` : res);
-  })();
-  `,
+  })();`,
 };
 
 export const twoSumMdx: string = `
