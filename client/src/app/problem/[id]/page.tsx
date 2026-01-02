@@ -15,6 +15,8 @@ import { useServerMutation } from "@/hooks/useMutation";
 import { useSSE } from "@/hooks/useSSE";
 import { useState, useEffect } from "react";
 import type { TestCaseState } from "@/components/problem/test-cases";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import SubmissionsTable from "@/components/problem/submissions-table";
 
 const KEY = `/problems`;
 
@@ -201,7 +203,20 @@ export default function ProblemPage() {
 
     <ResizablePanelGroup direction="horizontal" className="h-screen">
       <ResizablePanel defaultSize={40}>
-        {problem?.data?.bodyMdx && <Question bodyMdx={problem.data.bodyMdx as string} />}
+        <Tabs defaultValue="problem" className="h-full flex flex-col">
+          <div className="p-4 border-b">
+            <TabsList>
+              <TabsTrigger value="problem">Problem</TabsTrigger>
+              <TabsTrigger value="submissions">Submissions</TabsTrigger>
+            </TabsList>
+          </div>
+          <TabsContent value="problem" className="flex-1 overflow-auto m-0">
+            {problem?.data?.bodyMdx && <Question bodyMdx={problem.data.bodyMdx as string} />}
+          </TabsContent>
+          <TabsContent value="submissions" className="flex-1 overflow-auto m-0">
+            <SubmissionsTable problemId={id as string} />
+          </TabsContent>
+        </Tabs>
       </ResizablePanel>
       <ResizablePanel defaultSize={60}>
         <ResizablePanelGroup direction="vertical">
