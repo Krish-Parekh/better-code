@@ -6,27 +6,33 @@ import fs from "fs-extra";
 import { v4 as uuidv4 } from "uuid";
 import db from "./db";
 import { testCases } from "./db/schema/test_cases";
+
 const docker = new Docker();
+
 import { eq } from "drizzle-orm";
 import type { ITestCase } from "./types/main";
 
 const SUPPORTED_LANGUAGES = {
 	python: "python:3.13-alpine",
 	javascript: "node:23-alpine",
-}
+};
 
 const LANGUAGE_EXEC_MAP = {
 	python: "python3 -u /app/solution.py < /app/input.txt",
-	javascript: "node /app/solution.js < /app/input.txt"
-}
+	javascript: "node /app/solution.js < /app/input.txt",
+};
 
 async function runSubmission(job: Job) {
 	const submissionId = uuidv4();
-	console.log(`[${submissionId}] Starting submission processing for job ${job.id}`);
+	console.log(
+		`[${submissionId}] Starting submission processing for job ${job.id}`,
+	);
 
 	try {
 		const { problemId, language, code } = job.data;
-		console.log(`[${submissionId}] Processing submission - Problem ID: ${problemId}, Language: ${language}`);
+		console.log(
+			`[${submissionId}] Processing submission - Problem ID: ${problemId}, Language: ${language}`,
+		);
 
 		// Emit progress: Starting
 		await job.updateProgress({
@@ -36,8 +42,13 @@ async function runSubmission(job: Job) {
 		});
 
 		// Get the test cases from the database.
-		console.log(`[${submissionId}] Fetching test cases from database for problem ${problemId}`);
-		const testCaseRows = await db.select().from(testCases).where(eq(testCases.problemId, problemId)) as ITestCase[];
+		console.log(
+			`[${submissionId}] Fetching test cases from database for problem ${problemId}`,
+		);
+		const testCaseRows = (await db
+			.select()
+			.from(testCases)
+			.where(eq(testCases.problemId, problemId))) as ITestCase[];
 		console.log(`[${submissionId}] Found ${testCaseRows.length} test cases`);
 
 		// Emit progress: Test cases found
@@ -77,10 +88,13 @@ async function runSubmission(job: Job) {
 		}
 
 		// Get the image for the language.
-		const image = SUPPORTED_LANGUAGES[language as keyof typeof SUPPORTED_LANGUAGES];
+		const image =
+			SUPPORTED_LANGUAGES[language as keyof typeof SUPPORTED_LANGUAGES];
 
 		if (!image) {
-			console.error(`[${submissionId}] No Docker image found for language: ${language}`);
+			console.error(
+				`[${submissionId}] No Docker image found for language: ${language}`,
+			);
 			throw new Error(`Unsupported language: ${language}`);
 		}
 
@@ -121,14 +135,18 @@ async function runSubmission(job: Job) {
 			});
 
 			// Run the test cases.
-			console.log(`[${submissionId}] Running ${testCaseRows.length} test cases`);
+			console.log(
+				`[${submissionId}] Running ${testCaseRows.length} test cases`,
+			);
 			for (let i = 0; i < testCaseRows.length; i++) {
 				const testCase = testCaseRows[i];
 				if (!testCase) {
 					throw new Error(`Test case ${i + 1} is undefined`);
 				}
 				const { stdin, stdout } = testCase;
-				console.log(`[${submissionId}] Running test case ${i + 1}/${testCaseRows.length}`);
+				console.log(
+					`[${submissionId}] Running test case ${i + 1}/${testCaseRows.length}`,
+				);
 
 				// Emit progress: Running test case
 				await job.updateProgress({
@@ -140,7 +158,11 @@ async function runSubmission(job: Job) {
 				});
 
 				const exec = await container.exec({
-					Cmd: ["sh", "-c", LANGUAGE_EXEC_MAP[language as keyof typeof LANGUAGE_EXEC_MAP]],
+					Cmd: [
+						"sh",
+						"-c",
+						LANGUAGE_EXEC_MAP[language as keyof typeof LANGUAGE_EXEC_MAP],
+					],
 					AttachStdout: true,
 					AttachStderr: true,
 				});
@@ -155,24 +177,24 @@ async function runSubmission(job: Job) {
 
 				let stdoutOutput = "";
 				let stderrOutput = "";
-				
+
 				// Use dockerode's modem to demultiplex stdout and stderr
 				const modem = (docker as any).modem;
 				if (modem && modem.demuxStream) {
 					// dockerode provides demuxStream utility
 					const stdoutStream = new PassThrough();
 					const stderrStream = new PassThrough();
-					
+
 					modem.demuxStream(stream, stdoutStream, stderrStream);
-					
+
 					stdoutStream.on("data", (chunk: Buffer) => {
 						stdoutOutput += chunk.toString("utf-8");
 					});
-					
+
 					stderrStream.on("data", (chunk: Buffer) => {
 						stderrOutput += chunk.toString("utf-8");
 					});
-					
+
 					await new Promise((resolve, reject) => {
 						stream.on("end", resolve);
 						stream.on("error", reject);
@@ -184,7 +206,7 @@ async function runSubmission(job: Job) {
 							// Docker multiplex format: [stream_type(1)][padding(3)][size(4)][data...]
 							const streamType = chunk[0];
 							const data = chunk.slice(8);
-							
+
 							if (streamType === 1) {
 								stdoutOutput += data.toString("utf-8");
 							} else if (streamType === 2) {
@@ -204,26 +226,44 @@ async function runSubmission(job: Job) {
 
 				// Log stderr if present for debugging
 				if (stderrOutput.trim()) {
-					console.log(`[${submissionId}] Test case ${i + 1} stderr: ${stderrOutput.trim()}`);
+					console.log(
+						`[${submissionId}] Test case ${i + 1} stderr: ${stderrOutput.trim()}`,
+					);
 				}
 
-				const actualOutput = stdoutOutput.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-				const expectedOutput = stdout.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-				
+				const actualOutput = stdoutOutput
+					.trim()
+					.replace(/\r\n/g, "\n")
+					.replace(/\r/g, "\n");
+				const expectedOutput = stdout
+					.trim()
+					.replace(/\r\n/g, "\n")
+					.replace(/\r/g, "\n");
+
 				// Debug: log actual bytes to see hidden characters
-				console.log(`[${submissionId}] Test case ${i + 1} - Expected (${expectedOutput.length} chars): "${expectedOutput}"`);
-				console.log(`[${submissionId}] Test case ${i + 1} - Got (${actualOutput.length} chars): "${actualOutput}"`);
-				console.log(`[${submissionId}] Test case ${i + 1} - Expected bytes: [${Array.from(Buffer.from(expectedOutput)).join(',')}]`);
-				console.log(`[${submissionId}] Test case ${i + 1} - Got bytes: [${Array.from(Buffer.from(actualOutput)).join(',')}]`);
-				
+				console.log(
+					`[${submissionId}] Test case ${i + 1} - Expected (${expectedOutput.length} chars): "${expectedOutput}"`,
+				);
+				console.log(
+					`[${submissionId}] Test case ${i + 1} - Got (${actualOutput.length} chars): "${actualOutput}"`,
+				);
+				console.log(
+					`[${submissionId}] Test case ${i + 1} - Expected bytes: [${Array.from(Buffer.from(expectedOutput)).join(",")}]`,
+				);
+				console.log(
+					`[${submissionId}] Test case ${i + 1} - Got bytes: [${Array.from(Buffer.from(actualOutput)).join(",")}]`,
+				);
+
 				const isMatch = actualOutput === expectedOutput;
-				console.log(`[${submissionId}] Test case ${i + 1} result: ${isMatch ? 'PASS' : 'FAIL'}`);
+				console.log(
+					`[${submissionId}] Test case ${i + 1} result: ${isMatch ? "PASS" : "FAIL"}`,
+				);
 
 				// Emit progress: Test case result
 				await job.updateProgress({
 					type: "testCase",
 					status: isMatch ? "PASSED" : "FAILED",
-					message: `Test case ${i + 1} ${isMatch ? 'passed' : 'failed'}`,
+					message: `Test case ${i + 1} ${isMatch ? "passed" : "failed"}`,
 					currentTestCase: i + 1,
 					totalTestCases: testCaseRows.length,
 					passed: isMatch,
@@ -232,8 +272,10 @@ async function runSubmission(job: Job) {
 				});
 
 				if (!isMatch) {
-					console.error(`[${submissionId}] Test case ${i + 1} failed - Expected: "${expectedOutput}", Got: "${actualOutput}"`);
-					
+					console.error(
+						`[${submissionId}] Test case ${i + 1} failed - Expected: "${expectedOutput}", Got: "${actualOutput}"`,
+					);
+
 					// Emit progress: Submission failed
 					await job.updateProgress({
 						type: "status",
@@ -241,8 +283,10 @@ async function runSubmission(job: Job) {
 						message: `Test case ${i + 1} failed`,
 						error: `Expected: "${expectedOutput}", Got: "${actualOutput}"`,
 					});
-					
-					throw new Error(`Test case failed: ${stdin} -> ${actualOutput} !== ${expectedOutput}`);
+
+					throw new Error(
+						`Test case failed: ${stdin} -> ${actualOutput} !== ${expectedOutput}`,
+					);
 				}
 
 				// Clean the output file.
@@ -266,7 +310,7 @@ async function runSubmission(job: Job) {
 			await fs.remove(workDir);
 
 			console.log(`[${submissionId}] Submission completed successfully`);
-			return { 
+			return {
 				success: true,
 				status: "ACCEPTED",
 				message: "All test cases passed",
@@ -274,7 +318,7 @@ async function runSubmission(job: Job) {
 			};
 		} catch (error) {
 			console.error(`[${submissionId}] Container execution failed:`, error);
-			
+
 			// Emit progress: Error occurred
 			try {
 				await job.updateProgress({
@@ -284,28 +328,35 @@ async function runSubmission(job: Job) {
 					error: error instanceof Error ? error.message : String(error),
 				});
 			} catch (progressError) {
-				console.error(`[${submissionId}] Failed to update progress:`, progressError);
+				console.error(
+					`[${submissionId}] Failed to update progress:`,
+					progressError,
+				);
 			}
-			
+
 			throw new Error(`Failed to create container: ${error}`);
 		} finally {
 			console.log(`[${submissionId}] Cleanup: Removing working directory`);
 			await fs.remove(workDir);
 
 			if (container) {
-				console.log(`[${submissionId}] Cleanup: Stopping and removing container`);
+				console.log(
+					`[${submissionId}] Cleanup: Stopping and removing container`,
+				);
 				try {
 					await container.stop();
 					await container.remove();
 				} catch (cleanupError) {
-					console.error(`[${submissionId}] Error during container cleanup:`, cleanupError);
+					console.error(
+						`[${submissionId}] Error during container cleanup:`,
+						cleanupError,
+					);
 				}
 			}
 		}
-
 	} catch (error) {
 		console.error(`[${submissionId}] Submission processing failed:`, error);
-		
+
 		// Emit progress: Submission failed
 		try {
 			await job.updateProgress({
@@ -315,9 +366,12 @@ async function runSubmission(job: Job) {
 				error: error instanceof Error ? error.message : String(error),
 			});
 		} catch (progressError) {
-			console.error(`[${submissionId}] Failed to update progress:`, progressError);
+			console.error(
+				`[${submissionId}] Failed to update progress:`,
+				progressError,
+			);
 		}
-		
+
 		throw new Error(`Failed to run submission: ${error}`);
 	}
 }

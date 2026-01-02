@@ -32,7 +32,6 @@ export interface IProblemById {
 	bodyMdx: string;
 	metadata: unknown;
 	testCases: ITestCase[];
-
 }
 declare module "express-serve-static-core" {
 	interface Request {

@@ -5,7 +5,13 @@ import db from "../db";
 import { problems } from "../db/schema/problems";
 import { submissions } from "../db/schema/submissions";
 import { testCases } from "../db/schema/test_cases";
-import type { ICompany, IProblem, IResponse, IProblemById, ITestCase } from "../types/main";
+import type {
+	ICompany,
+	IProblem,
+	IProblemById,
+	IResponse,
+	ITestCase,
+} from "../types/main";
 
 export default async function getProblems(
 	_request: Request,
@@ -38,9 +44,9 @@ export default async function getProblems(
 			.groupBy(problems.id, problems.title, submissions.status);
 
 		// Limit to top 3 companies for each problem
-		const processedResult = result.map(problem => ({
+		const processedResult = result.map((problem) => ({
 			...problem,
-			companies: problem.companies.slice(0, 3)
+			companies: problem.companies.slice(0, 3),
 		}));
 
 		const payload: IResponse<IProblem[]> = {
@@ -78,12 +84,17 @@ export async function getProblemById(
 					) FILTER (WHERE ${testCases.id} IS NOT NULL),
 					'[]'::json
 				)
-				`
+				`,
 			})
 			.from(problems)
 			.leftJoin(testCases, eq(problems.id, testCases.problemId))
 			.where(eq(problems.id, id as string))
-			.groupBy(problems.id, problems.title, problems.bodyMdx, problems.metadata);
+			.groupBy(
+				problems.id,
+				problems.title,
+				problems.bodyMdx,
+				problems.metadata,
+			);
 
 		const payload: IResponse<IProblemById> = {
 			status: StatusCodes.OK,

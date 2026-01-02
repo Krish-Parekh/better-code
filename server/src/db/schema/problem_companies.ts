@@ -23,7 +23,9 @@ export const problemCompanies = pgTable(
 			}),
 		frequency: integer("frequency").notNull().default(1),
 		lastSeenYear: integer("last_seen_year").notNull(),
-		createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
 		updatedAt: timestamp("updated_at", { withTimezone: true })
 			.notNull()
 			.defaultNow()

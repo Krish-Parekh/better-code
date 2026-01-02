@@ -1,5 +1,4 @@
-export const twoSumPythonCode = 
-`# Python - Two Sum
+export const twoSumPythonCode = `# Python - Two Sum
 class Solution:
     def solve(self, nums, target):
         # TODO: implement
@@ -15,8 +14,7 @@ if __name__ == "__main__":
     print(ans)
 `;
 
-export const twoSumJavascriptCode = 
-`// JavaScript - Two Sum
+export const twoSumJavascriptCode = `// JavaScript - Two Sum
 function solve(nums, target) {
     // TODO: implement
     // return [i, j]
@@ -30,8 +28,7 @@ const ans = solve(nums, target);
 console.log(ans);
 `;
 
-export const maximumSubarraySumPythonCode = 
-`# Python - Maximum Subarray Sum
+export const maximumSubarraySumPythonCode = `# Python - Maximum Subarray Sum
 class Solution:
     def solve(self, nums):
         # TODO: implement
@@ -45,8 +42,7 @@ if __name__ == "__main__":
     print(ans)
 `;
 
-export const maximumSubarraySumJavascriptCode = 
-`// JavaScript - Maximum Subarray Sum
+export const maximumSubarraySumJavascriptCode = `// JavaScript - Maximum Subarray Sum
 function solve(nums) {
     // TODO: implement
     // return maximum subarray sum
@@ -58,8 +54,7 @@ const ans = solve(nums);
 console.log(ans);
 `;
 
-export const subarraySumEqualsKPythonCode = 
-`# Python - Subarray Sum Equals K
+export const subarraySumEqualsKPythonCode = `# Python - Subarray Sum Equals K
 class Solution:
     def solve(self, nums, k):
         # TODO: implement
@@ -75,8 +70,7 @@ if __name__ == "__main__":
     print(ans)
 `;
 
-export const subarraySumEqualsKJavascriptCode = 
-`// JavaScript - Subarray Sum Equals K
+export const subarraySumEqualsKJavascriptCode = `// JavaScript - Subarray Sum Equals K
 function solve(nums, k) {
     // TODO: implement
     // return count of subarrays whose sum equals k

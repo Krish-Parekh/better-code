@@ -7,8 +7,8 @@ import express from "express";
 import { join } from "path";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import problemsRouter from "./routers/problems.routers";
-import { auth } from "./utils/auth";
 import submissionsRouter from "./routers/submissions.routers";
+import { auth } from "./utils/auth";
 
 dotenv.config({
 	path: ".env",
@@ -37,8 +37,6 @@ app.use(errorMiddleware);
 
 app.use("/api/problems", problemsRouter);
 app.use("/api/submissions", submissionsRouter);
-
-
 
 app.listen(process.env.PORT, () => {
 	console.log(`Server is running on port ${process.env.PORT}`);

@@ -1,5 +1,7 @@
 import { Router } from "express";
-import getProblems, { getProblemById } from "../controllers/problems.controller";
+import getProblems, {
+	getProblemById,
+} from "../controllers/problems.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 const problemsRouter = Router();
