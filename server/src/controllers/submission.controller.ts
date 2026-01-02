@@ -2,6 +2,9 @@ import type { NextFunction, Request, Response } from "express";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import type { IResponse } from "../types/main";
 import { queueEvents, submissionsQueue } from "../utils/queue";
+import db from "../db";
+import { submissions } from "../db/schema/submissions";
+import { eq, desc } from "drizzle-orm";
 
 export const createSubmission = async (
 	request: Request,
@@ -121,6 +124,44 @@ export const getSubmissionStatus = async (
 		// Handle client disconnect
 		request.on("close", cleanup);
 
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const getSubmissionsByProblemId = async (
+	request: Request,
+	response: Response,
+	next: NextFunction,
+) => {
+	try {
+		const { problemId } = request.params;
+
+		if (!problemId) {
+			return response
+				.status(StatusCodes.BAD_REQUEST)
+				.json({ message: "Problem ID is required" });
+		}
+
+		const result = await db
+			.select({
+				id: submissions.id,
+				language: submissions.language,
+				runtime_ms: submissions.runtime_ms,
+				memory_kb: submissions.memory_kb,
+				status: submissions.status,
+				createdAt: submissions.createdAt,
+			})
+			.from(submissions)
+			.where(eq(submissions.problemId, problemId))
+			.orderBy(desc(submissions.createdAt));
+
+		const payload: IResponse<typeof result> = {
+			status: StatusCodes.OK,
+			message: ReasonPhrases.OK,
+			data: result,
+		};
+		return response.status(StatusCodes.OK).json(payload);
 	} catch (error) {
 		next(error);
 	}
