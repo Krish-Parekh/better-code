@@ -147,8 +147,8 @@ export const getSubmissionsByProblemId = async (
 			.select({
 				id: submissions.id,
 				language: submissions.language,
-				runtime_ms: submissions.runtime_ms,
-				memory_kb: submissions.memory_kb,
+				runtime_ms: submissions.runtimeMs,
+				memory_kb: submissions.memoryKb,
 				status: submissions.status,
 				createdAt: submissions.createdAt,
 			})

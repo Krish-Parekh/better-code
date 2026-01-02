@@ -11,16 +11,23 @@ import { problems } from "./problems";
 export const problemCompanies = pgTable(
 	"problem_companies",
 	{
-		problemId: uuid("problem_id").references(() => problems.id, {
-			onDelete: "cascade",
-		}),
-		companyId: uuid("company_id").references(() => companies.id, {
-			onDelete: "cascade",
-		}),
+		problemId: uuid("problem_id")
+			.notNull()
+			.references(() => problems.id, {
+				onDelete: "cascade",
+			}),
+		companyId: uuid("company_id")
+			.notNull()
+			.references(() => companies.id, {
+				onDelete: "cascade",
+			}),
 		frequency: integer("frequency").notNull().default(1),
 		lastSeenYear: integer("last_seen_year").notNull(),
-		createdAt: timestamp("created_at").notNull().defaultNow(),
-		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+		createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow()
+			.$onUpdate(() => new Date()),
 	},
 	(table) => [primaryKey({ columns: [table.problemId, table.companyId] })],
 );
