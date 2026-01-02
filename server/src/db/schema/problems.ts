@@ -6,6 +6,7 @@ import {
 	text,
 	timestamp,
 	uuid,
+	boolean,
 } from "drizzle-orm/pg-core";
 
 export const problems = pgTable(
@@ -18,6 +19,7 @@ export const problems = pgTable(
 		difficulty: text("difficulty").notNull(),
 		tags: jsonb("tags").notNull().default([]),
 		codeSnippets: jsonb("code_snippets").notNull().default({}),
+		isPaid: boolean("is_paid").notNull().default(false),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),
