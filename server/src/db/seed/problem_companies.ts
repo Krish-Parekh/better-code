@@ -42,5 +42,3 @@ export default async function seedProblemCompanies() {
 		throw error;
 	}
 }
-
-await seedProblemCompanies();
