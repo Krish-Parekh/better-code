@@ -1,5 +1,6 @@
 import { Router } from "express";
-import getProblems, {
+import {
+	getProblems,
 	getProblemById,
 } from "../controllers/problems.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";

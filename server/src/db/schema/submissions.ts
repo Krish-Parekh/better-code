@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import {
 	check,
@@ -46,3 +47,14 @@ export const submissions = pgTable(
 		),
 	],
 );
+
+export const submissionsRelations = relations(submissions, ({ one }) => ({
+	problem: one(problems, {
+		fields: [submissions.problemId],
+		references: [problems.id],
+	}),
+	user: one(user, {
+		fields: [submissions.userId],
+		references: [user.id],
+	}),
+}));

@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import {
 	check,
@@ -8,6 +9,9 @@ import {
 	uuid,
 	boolean,
 } from "drizzle-orm/pg-core";
+import { problemCompanies } from "./problem_companies";
+import { testCases } from "./testcases";
+import { submissions } from "./submissions";
 
 export const problems = pgTable(
 	"problems",
@@ -35,3 +39,9 @@ export const problems = pgTable(
 		),
 	],
 );
+
+export const problemsRelations = relations(problems, ({ many }) => ({
+	problemCompanies: many(problemCompanies),
+	testCases: many(testCases),
+	submissions: many(submissions),
+}));

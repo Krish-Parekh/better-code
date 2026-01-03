@@ -1,4 +1,11 @@
 import type { User } from "better-auth/types";
+
+export type SubmissionStatus =
+	| "PENDING"
+	| "ACCEPTED"
+	| "REJECTED"
+	| "NOT_SUBMITTED";
+
 export interface IResponse<T> {
 	status: number;
 	message: string;
@@ -13,6 +20,8 @@ export interface ICompany {
 export interface IProblem {
 	id: string;
 	title: string;
+	slug: string;
+	isPaid: boolean;
 	submissions: SubmissionStatus | null;
 	companies: ICompany[];
 }

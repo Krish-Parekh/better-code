@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
 	boolean,
 	integer,
@@ -23,7 +24,7 @@ export const testCases = pgTable(
 		input: text("input").notNull(),
 		output: text("output").notNull(),
 		bodyMdx: text("body_mdx").notNull(),
-		isHidden: boolean("is_hidden").notNull().default(false), 
+		isHidden: boolean("is_hidden").notNull().default(false),
 		order: integer("order").notNull().default(0),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
@@ -35,3 +36,10 @@ export const testCases = pgTable(
 	},
 	(table) => [unique().on(table.problemId, table.input, table.output)],
 );
+
+export const testCasesRelations = relations(testCases, ({ one }) => ({
+	problem: one(problems, {
+		fields: [testCases.problemId],
+		references: [problems.id],
+	}),
+}));

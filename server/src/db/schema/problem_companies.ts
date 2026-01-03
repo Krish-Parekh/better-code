@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
 	integer,
 	pgTable,
@@ -32,4 +33,18 @@ export const problemCompanies = pgTable(
 			.$onUpdate(() => new Date()),
 	},
 	(table) => [primaryKey({ columns: [table.problemId, table.companyId] })],
+);
+
+export const problemCompaniesRelations = relations(
+	problemCompanies,
+	({ one }) => ({
+		problem: one(problems, {
+			fields: [problemCompanies.problemId],
+			references: [problems.id],
+		}),
+		company: one(companies, {
+			fields: [problemCompanies.companyId],
+			references: [companies.id],
+		}),
+	}),
 );
