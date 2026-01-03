@@ -10,7 +10,7 @@ import {
 import { problems } from "./problems";
 
 export const testCases = pgTable(
-	"test_cases",
+	"testcases",
 	{
 		id: uuid("id").primaryKey().defaultRandom(),
 		problemId: uuid("problem_id")

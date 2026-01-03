@@ -48,5 +48,3 @@ export default async function seedTestCases() {
 		throw error;
 	}
 }
-
-await seedTestCases();
