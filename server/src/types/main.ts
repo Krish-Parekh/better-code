@@ -1,5 +1,4 @@
 import type { User } from "better-auth/types";
-import type { SubmissionStatus } from "../db/schema/submissions";
 export interface IResponse<T> {
 	status: number;
 	message: string;

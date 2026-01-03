@@ -23,8 +23,8 @@ export const testCases = pgTable(
 		input: text("input").notNull(),
 		output: text("output").notNull(),
 		bodyMdx: text("body_mdx").notNull(),
-		isHidden: boolean("is_hidden").notNull().default(false), // Hidden test cases for judging
-		order: integer("order").notNull().default(0), // Order for displaying test cases
+		isHidden: boolean("is_hidden").notNull().default(false), 
+		order: integer("order").notNull().default(0),
 		createdAt: timestamp("created_at", { withTimezone: true })
 			.notNull()
 			.defaultNow(),
