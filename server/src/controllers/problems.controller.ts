@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { ReasonPhrases, StatusCodes } from "http-status-codes";
 import db from "../db";
-import type { IProblem, IResponse } from "../types/main";
+import type { IProblem, IResponse, IProblemById } from "../types/main";
 
 const getLatestSubmissionStatus = (
 	submissions: Array<{ status: string; createdAt: Date }>,
@@ -86,10 +86,19 @@ async function getProblemById(
 	try {
 		const { id } = request.params;
 		const problem = await db.query.problems.findFirst({
+			columns: {
+				id: true,
+				title: true,
+				bodyMdx: true,
+				codeSnippets: true,
+			},
 			with: {
-				problemCompanies: {
-					with: {
-						company: true,
+				testCases: {
+					columns: {
+						id: true,
+						input: true,
+						output: true,
+						order: true,
 					},
 				},
 			},
@@ -104,10 +113,42 @@ async function getProblemById(
 			return response.status(StatusCodes.NOT_FOUND).json(payload);
 		}
 
-		const payload: IResponse<typeof problem> = {
+		// Transform codeSnippets to templates format
+		const codeSnippets = problem.codeSnippets as {
+			python?: { template: string };
+			javascript?: { template: string };
+			cpp?: { template: string };
+		};
+
+		const templates = {
+			python: codeSnippets.python?.template || "",
+			javascript: codeSnippets.javascript?.template || "",
+			java: codeSnippets.cpp?.template || "", // Map cpp to java for now, or add java support later
+		};
+
+		// Transform test cases to expected format (sorted by order)
+		const testCases = problem.testCases
+			.sort((a, b) => (a.order || 0) - (b.order || 0))
+			.map((tc) => ({
+				testCaseId: tc.id,
+				input: tc.input,
+				output: tc.output,
+			}));
+
+		const result: IProblemById = {
+			id: problem.id,
+			title: problem.title,
+			bodyMdx: problem.bodyMdx,
+			metadata: {
+				templates,
+			},
+			testCases,
+		};
+
+		const payload: IResponse<IProblemById> = {
 			status: StatusCodes.OK,
 			message: ReasonPhrases.OK,
-			data: problem,
+			data: result,
 		};
 
 		return response.status(StatusCodes.OK).json(payload);

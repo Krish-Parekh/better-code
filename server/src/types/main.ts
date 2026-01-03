@@ -34,12 +34,23 @@ export interface ITestCase {
 	output: string;
 	bodyMdx: string;
 }
+
 export interface IProblemById {
 	id: string;
 	title: string;
 	bodyMdx: string;
-	metadata: unknown;
-	testCases: ITestCase[];
+	metadata: {
+		templates: {
+			python: string;
+			javascript: string;
+			java: string;
+		};
+	};
+	testCases: Array<{
+		testCaseId: string;
+		input: string;
+		output: string;
+	}>;
 }
 declare module "express-serve-static-core" {
 	interface Request {
