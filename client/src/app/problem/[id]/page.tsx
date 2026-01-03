@@ -18,30 +18,21 @@ import type { TestCaseState } from "@/components/problem/test-cases";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SubmissionsTable from "@/components/problem/submissions-table";
 
-const KEY = `/problems`;
+import type { IResponse, IProblemById } from "@/types";
 
-interface IResponse<T> {
-  status: number
-  message: string
-  data: T
-}
-interface ITestCase {
-  testCaseId: string
-  input: string
-  output: string
-}
-interface IProblemById {
-  id: string;
-  title: string
-  bodyMdx: string
-  metadata: {
-    templates: {
-      python: string
-      javascript: string
-      java: string
-    }
-  }
-  testCases: ITestCase[]
+const KEY = `/api/problems`;
+
+interface SubmissionStatus {
+	type: "status" | "testCase" | "completed" | "failed";
+	status: "PENDING" | "PROCESSING" | "ACCEPTED" | "REJECTED" | "PASSED" | "FAILED";
+	message: string;
+	currentTestCase?: number;
+	totalTestCases?: number;
+	passed?: boolean;
+	expected?: string;
+	actual?: string;
+	error?: string;
+	result?: any;
 }
 
 interface SubmissionStatus {

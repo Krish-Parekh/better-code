@@ -4,18 +4,13 @@ import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
-
-interface TestCase {
-  testCaseId: string;
-  input: string;
-  output: string;
-}
+import type { ITestCase } from "@/types";
 
 export type TestCaseState = "pending" | "running" | "passed" | "failed";
 
 interface TestCasesProps {
-  testCases?: TestCase[];
-  testCaseStates?: Record<number, TestCaseState>;
+	testCases?: ITestCase[];
+	testCaseStates?: Record<number, TestCaseState>;
 }
 
 export default function TestCases({ testCases = [], testCaseStates = {} }: TestCasesProps) {
