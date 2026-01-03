@@ -20,7 +20,7 @@ import SubmissionsTable from "@/components/problem/submissions-table";
 
 import type { IResponse, IProblemById } from "@/types";
 
-const KEY = `/api/problems`;
+const KEY = `/problems`;
 
 interface SubmissionStatus {
 	type: "status" | "testCase" | "completed" | "failed";
@@ -33,19 +33,6 @@ interface SubmissionStatus {
 	actual?: string;
 	error?: string;
 	result?: any;
-}
-
-interface SubmissionStatus {
-  type: "status" | "testCase" | "completed" | "failed";
-  status: "PENDING" | "PROCESSING" | "ACCEPTED" | "REJECTED" | "PASSED" | "FAILED";
-  message: string;
-  currentTestCase?: number;
-  totalTestCases?: number;
-  passed?: boolean;
-  expected?: string;
-  actual?: string;
-  error?: string;
-  result?: any;
 }
 
 export default function ProblemPage() {

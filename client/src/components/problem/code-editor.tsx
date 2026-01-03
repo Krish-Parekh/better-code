@@ -26,7 +26,7 @@ export default function CodeEditor({ templates }: CodeEditorProps) {
         height="100%"
         width="100%"
         theme="vs-dark"
-        language={code ? code.split("\n")[0].split(" ")[1].toLowerCase() : "python"}
+        language={"python"}
         value={code || undefined}
         onChange={(value) => setCode(value || "")}
       />
