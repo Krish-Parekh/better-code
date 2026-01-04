@@ -5,6 +5,7 @@ import db from "../db";
 import { submissions } from "../db/schema/submissions";
 import type { IResponse } from "../types/main";
 import { queueEvents, submissionsQueue } from "../utils/queue";
+import type { JobProgress } from "bullmq";
 
 export const createSubmission = async (
 	request: Request,
@@ -39,9 +40,9 @@ export const getSubmissionStatus = async (
 	next: NextFunction,
 ) => {
 	try {
-		const { jobId } = request.params;
+		const { id } = request.params;
 
-		if (!jobId) {
+		if (!id) {
 			return response
 				.status(StatusCodes.BAD_REQUEST)
 				.json({ message: "Job ID is required" });
@@ -55,73 +56,51 @@ export const getSubmissionStatus = async (
 
 		response.flushHeaders();
 
-		const job = await submissionsQueue.getJob(jobId);
+		const job = await submissionsQueue.getJob(id);
 		if (!job) {
-			response.write(`data: ${JSON.stringify({ error: "Job not found" })}\n\n`);
+			const payload = JSON.stringify({ error: "Job not found" });
+			response.write(`data: ${payload}\n\n`);
 			response.end();
 			return;
 		}
 
-		const state = await job.getState();
-
-		// Send initial state
-		response.write(
-			`data: ${JSON.stringify({
-				type: "status",
-				status: state,
-				message: `Job is ${state}`,
-			})}\n\n`,
-		);
-
-		// Listen for progress updates
-		const progressListener = ({ jobId: eventJobId, data }: any) => {
-			if (eventJobId === jobId) {
-				const progressData = typeof data === "string" ? JSON.parse(data) : data;
-				response.write(
-					`data: ${JSON.stringify({
-						type: progressData.type || "progress",
-						...progressData,
-					})}\n\n`,
-				);
+		const progressListener = async ({ jobId, data }: any) => {
+			if (jobId === id) {
+				const dataObject = typeof data === "string" ? JSON.parse(data) : data;
+				const payload = JSON.stringify({
+					status: "PROGRESS",
+					index: dataObject.index,
+				});
+				response.write(`data: ${payload}\n\n`);
 			}
 		};
 
-		// Listen for completion
-		const completedListener = ({ jobId: eventJobId, returnvalue }: any) => {
-			if (eventJobId === jobId) {
-				response.write(
-					`data: ${JSON.stringify({
-						type: "completed",
-						status: "ACCEPTED",
-						message: "All test cases passed",
-						result: returnvalue,
-					})}\n\n`,
-				);
-				cleanup();
+		const completedListener = async ({ jobId, data }: any) => {
+			if (jobId === id) {
+				const dataObject = typeof data === "string" ? JSON.parse(data) : data;
+				const payload = JSON.stringify({
+					status: "COMPLETED",
+					...dataObject,
+				});
+				response.write(`data: ${payload}\n\n`);
 			}
 		};
 
-		// Listen for failures
-		const failedListener = ({ jobId: eventJobId, failedReason }: any) => {
-			if (eventJobId === jobId) {
-				response.write(
-					`data: ${JSON.stringify({
-						type: "failed",
-						status: "REJECTED",
-						message: "Submission failed",
-						error: failedReason,
-					})}\n\n`,
-				);
-				cleanup();
+		const failedListener = async ({ jobId, data }: any) => {
+			if (jobId === id) {
+				const dataObject = typeof data === "string" ? JSON.parse(data) : data;
+				const payload = JSON.stringify({
+					status: "FAILED",
+					...dataObject,
+				});
+				response.write(`data: ${payload}\n\n`);
 			}
 		};
 
-		// Attach listeners
 		queueEvents.on("progress", progressListener);
 		queueEvents.on("completed", completedListener);
 		queueEvents.on("failed", failedListener);
 
-		// Cleanup function
 		const cleanup = () => {
 			queueEvents.off("progress", progressListener);
 			queueEvents.off("completed", completedListener);
@@ -129,7 +108,6 @@ export const getSubmissionStatus = async (
 			response.end();
 		};
 
-		// Handle client disconnect
 		request.on("close", cleanup);
 	} catch (error) {
 		next(error);

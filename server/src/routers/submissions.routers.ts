@@ -14,6 +14,6 @@ submissionsRouter.get(
 	authMiddleware,
 	getSubmissionsByProblemId,
 );
-submissionsRouter.get("/:jobId/status", authMiddleware, getSubmissionStatus);
+submissionsRouter.get("/:id/status", authMiddleware, getSubmissionStatus);
 
 export default submissionsRouter;
