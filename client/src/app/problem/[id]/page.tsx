@@ -24,7 +24,7 @@ const KEY = `/problems`;
 
 interface SubmissionStatus {
 	type: "status" | "testCase" | "completed" | "failed";
-	status: "PENDING" | "PROCESSING" | "ACCEPTED" | "REJECTED" | "PASSED" | "FAILED";
+	status: "PENDING" | "PROCESSING"  | "ACCEPTED" | "REJECTED" | "PASSED" | "FAILED";
 	message: string;
 	currentTestCase?: number;
 	totalTestCases?: number;

@@ -5,7 +5,6 @@ import db from "../db";
 import { submissions } from "../db/schema/submissions";
 import type { IResponse } from "../types/main";
 import { queueEvents, submissionsQueue } from "../utils/queue";
-import type { JobProgress } from "bullmq";
 
 export const createSubmission = async (
 	request: Request,
@@ -80,7 +79,7 @@ export const getSubmissionStatus = async (
 				const dataObject = typeof data === "string" ? JSON.parse(data) : data;
 				const payload = JSON.stringify({
 					status: "COMPLETED",
-					...dataObject,
+					index: dataObject.index,
 				});
 				response.write(`data: ${payload}\n\n`);
 			}
@@ -91,7 +90,7 @@ export const getSubmissionStatus = async (
 				const dataObject = typeof data === "string" ? JSON.parse(data) : data;
 				const payload = JSON.stringify({
 					status: "FAILED",
-					...dataObject,
+					index: dataObject.index,
 				});
 				response.write(`data: ${payload}\n\n`);
 			}
