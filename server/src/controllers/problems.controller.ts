@@ -128,7 +128,7 @@ async function getProblemById(
 		const templates = {
 			python: codeSnippets.python?.template || "",
 			javascript: codeSnippets.javascript?.template || "",
-			java: codeSnippets.cpp?.template || "", 
+			java: codeSnippets.cpp?.template || "",
 		};
 
 		const testCasesResult = testCasesData.map((tc) => ({

@@ -61,3 +61,11 @@ export interface ILanguage {
 	python: string;
 	javascript: string;
 }
+
+export type CodeSnippet = {
+	prefix?: string;
+	suffix?: string;
+	template?: string;
+};
+
+export type CodeSnippets = Record<string, CodeSnippet>;

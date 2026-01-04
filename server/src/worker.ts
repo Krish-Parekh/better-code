@@ -5,22 +5,63 @@ import Docker from "dockerode";
 import fs from "fs-extra";
 import { v4 as uuidv4 } from "uuid";
 import db from "./db";
-import { testCases } from "./db/schema/test_cases";
+import { testCases } from "./db/schema/testcases";
+import { problems } from "./db/schema/problems";
 
 const docker = new Docker();
 
 import { eq } from "drizzle-orm";
-import type { ITestCase } from "./types/main";
+import type { ITestCase, CodeSnippets } from "./types/main";
 
 const SUPPORTED_LANGUAGES = {
 	python: "python:3.13-alpine",
 	javascript: "node:23-alpine",
+	cpp: "gcc:latest",
 };
 
 const LANGUAGE_EXEC_MAP = {
 	python: "python3 -u /app/solution.py < /app/input.txt",
 	javascript: "node /app/solution.js < /app/input.txt",
+	cpp: "g++ -O3 /app/solution.cpp -o /app/solution && /app/solution < /app/input.txt",
 };
+
+function combineCode(prefix: string, code: string, suffix: string): string {
+	const prefixTrimmed = prefix.trim();
+	const codeTrimmed = code.trim();
+	const suffixTrimmed = suffix.trim();
+
+	return [prefixTrimmed, codeTrimmed, suffixTrimmed].filter(Boolean).join("\n");
+}
+
+async function getCodeSnippets(
+	problemId: string,
+	language: string,
+): Promise<{ prefix: string; suffix: string } | null> {
+	const [problem] = await db
+		.select({
+			codeSnippets: problems.codeSnippets,
+		})
+		.from(problems)
+		.where(eq(problems.id, problemId))
+		.limit(1);
+
+	if (!problem || !problem.codeSnippets) {
+		return null;
+	}
+
+	const codeSnippets = problem.codeSnippets as CodeSnippets;
+
+	const languageSnippet = codeSnippets[language];
+
+	if (!languageSnippet) {
+		return null;
+	}
+
+	const prefix = languageSnippet.prefix || "";
+	const suffix = languageSnippet.suffix || "";
+
+	return { prefix, suffix };
+}
 
 async function runSubmission(job: Job) {
 	const submissionId = uuidv4();
@@ -71,16 +112,41 @@ async function runSubmission(job: Job) {
 			message: "Preparing code for execution...",
 		});
 
-		// Write the code to the temporary working directory
+		// Fetch code snippets (prefix and suffix) for the problem
+		console.log(
+			`[${submissionId}] Fetching code snippets for problem ${problemId} and language ${language}`,
+		);
+		const snippets = await getCodeSnippets(problemId, language);
+
+		if (!snippets) {
+			console.warn(
+				`[${submissionId}] No snippets found for problem ${problemId} and language ${language}, using raw code`,
+			);
+		}
+
+		// Combine prefix + user code + suffix
+		const finalCode = snippets
+			? combineCode(snippets.prefix, code, snippets.suffix)
+			: code;
+
+		console.log(
+			`[${submissionId}] Code combination complete. Original length: ${code.length}, Final length: ${finalCode.length}`,
+		);
+
+		// Write the combined code to the temporary working directory
 		console.log(`[${submissionId}] Writing code to working directory`);
 		switch (language) {
 			case "python":
-				await fs.writeFile(path.join(workDir, "solution.py"), code);
+				await fs.writeFile(path.join(workDir, "solution.py"), finalCode);
 				console.log(`[${submissionId}] Python code written to solution.py`);
 				break;
 			case "javascript":
-				await fs.writeFile(path.join(workDir, "solution.js"), code);
+				await fs.writeFile(path.join(workDir, "solution.js"), finalCode);
 				console.log(`[${submissionId}] JavaScript code written to solution.js`);
+				break;
+			case "cpp":
+				await fs.writeFile(path.join(workDir, "solution.cpp"), finalCode);
+				console.log(`[${submissionId}] C++ code written to solution.cpp`);
 				break;
 			default:
 				console.error(`[${submissionId}] Unsupported language: ${language}`);
